@@ -27,7 +27,7 @@ const TEXT_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 const TEXT_BASE = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1';
 
 const VISION_KEY = process.env.VISION_KEY || '';
-const VISION_MODEL = process.env.VISION_MODEL || 'qwen-vl-max';
+const VISION_MODEL = process.env.VISION_MODEL || 'qwen3.7-plus';
 const VISION_BASE = process.env.VISION_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1';
 
 const CORS = {
