@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#e8915b" />
+<title>喵迹</title>
+<style>
+  :root{--bg:#f4efe8;--card:#fff;--ink:#2b2620;--sub:#938a7c;--line:#ece4d8;
+    --accent:#e8915b;--accent2:#6ba368;--warn:#d9694e;--blue:#5b8bd0;--shadow:0 1px 8px rgba(80,60,30,.07)}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,"PingFang SC","Segoe UI",sans-serif;background:#ddd6cb;color:var(--ink);display:flex;justify-content:center;min-height:100vh}
+  .phone{width:390px;min-height:844px;background:var(--bg);position:relative;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.18);overflow:hidden}
+  .statusbar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:13px;color:var(--sub)}
+  .topbar{display:flex;align-items:center;gap:10px;padding:6px 16px 12px}
+  .topbar .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#f0b27a);display:flex;align-items:center;justify-content:center;font-size:18px}
+  .topbar h1{font-size:18px}
+  .topbar .cat{margin-left:auto;font-size:13px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:14px;padding:5px 11px;cursor:pointer}
+  .page{flex:1;overflow-y:auto;padding:0 16px 90px}.page::-webkit-scrollbar{display:none}
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s}
+  .kpi:active{transform:scale(.97)}
+  .kpi .l{font-size:11px;color:var(--sub);display:flex;justify-content:space-between}
+  .kpi .l i{font-style:normal;color:var(--accent)}
+  .kpi .v{font-size:20px;font-weight:700;margin-top:3px}
+  .kpi .t{font-size:11px;margin-top:2px}.up{color:var(--accent2)}.down{color:var(--warn)}.flat{color:var(--sub)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:14px}
+  .card h2{font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .card h2 .act{margin-left:auto;font-size:11px;color:var(--accent);font-weight:400;cursor:pointer}
+  .tag{font-size:10px;padding:2px 7px;border-radius:9px;background:#f3ede4;color:var(--sub)}
+  .loggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .logitem{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 6px;text-align:center;box-shadow:var(--shadow);cursor:pointer;transition:transform .12s}
+  .logitem:active{transform:scale(.94)}
+  .logitem .ic{font-size:22px}.logitem .nm{font-size:11px;margin-top:4px}.logitem .op{font-size:9px;color:var(--accent2);margin-top:1px}
+  .camcard{background:linear-gradient(135deg,#fff,#fbf3ea);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:12px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:var(--shadow)}
+  .camcard .ci{font-size:30px}.camcard .ct{font-size:13px;font-weight:700}.camcard .cs{font-size:11px;color:var(--sub);margin-top:2px}
+  .banner{background:linear-gradient(135deg,#fbe3da,#f7cabd);border:1px solid #f0b9a8;border-radius:13px;padding:11px 13px;margin-bottom:12px;cursor:pointer}
+  .banner .bt{font-size:13px;font-weight:700;color:#b8442c;display:flex}.banner .bt span{margin-left:auto;font-weight:400}
+  .banner .bd{font-size:11px;color:#9a4a37;margin-top:3px;line-height:1.5}
+  .guide{background:#eef4ea;border:1px solid #d6e6cd;border-radius:13px;padding:11px 13px;margin-bottom:10px;cursor:pointer}
+  .guide .gt{font-size:13px;font-weight:700;color:#3f7a39;display:flex}.guide .gt span{margin-left:auto;font-weight:400}
+  .guide ul{margin:7px 0 0 16px;font-size:11px;color:#4d6b46;line-height:1.7}
+  .bubble{font-size:12px;border-radius:11px;padding:9px 11px;margin:7px 0;line-height:1.55;white-space:pre-wrap}
+  .me{background:#eef3fb;margin-left:36px}.ai{background:#f6f1ea;margin-right:30px}.ai b{color:#b8442c}
+  .quick{display:flex;gap:7px;overflow-x:auto;padding:4px 0 8px}
+  .quick span{font-size:11px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px 11px;white-space:nowrap;color:#6b6356;cursor:pointer}
+  .chatbar{display:flex;gap:7px;align-items:center;border-top:1px solid var(--line);padding-top:9px}
+  .chatbar input{flex:1;border:1px solid var(--line);border-radius:18px;padding:9px 13px;font-size:12px;outline:none}
+  .chatbar button{border:none;background:var(--accent);color:#fff;border-radius:18px;padding:9px 15px;font-size:12px;cursor:pointer}
+  .tl{list-style:none}
+  .tl li{display:flex;gap:9px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12px;cursor:pointer;align-items:flex-start}
+  .tl li:last-child{border-bottom:none}.tl li:active{opacity:.55}
+  .tl li .tx{flex:1;line-height:1.5;word-break:break-all}.tl li .ar{color:var(--sub);font-size:14px}
+  .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:0 0 auto}.tl-date{color:var(--sub);font-size:11px;width:42px;flex:0 0 auto}
+  .filt{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px}
+  .filt span{font-size:11px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:5px 11px;white-space:nowrap;color:#6b6356;cursor:pointer}
+  .filt span.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .rrow{font-size:12px;display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);cursor:pointer}
+  .rrow:last-child{border-bottom:none}.rrow:active{opacity:.55}
+  .prof{display:flex;align-items:center;gap:12px;cursor:pointer}
+  .prof .ava{width:50px;height:50px;border-radius:50%;background:#f0e4d6;display:flex;align-items:center;justify-content:center;font-size:26px}
+  .prof .ar{margin-left:auto;color:var(--sub)}
+  .menu{list-style:none}
+  .menu li{display:flex;justify-content:space-between;align-items:center;padding:13px 4px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer}
+  .menu li:last-child{border-bottom:none}.menu li:active{background:#faf6f0}.menu .ar{color:var(--sub)}
+  .nav{position:absolute;bottom:0;left:0;right:0;height:58px;background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
+  .nav .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--sub);gap:2px;cursor:pointer}
+  .nav .tab .ni{font-size:19px}.nav .tab.on{color:var(--accent)}
+  .nav .fab{flex:0 0 auto;width:54px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .nav .fab .plus{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#f0b27a);color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(232,145,91,.4);margin-top:-12px}
+  .hidden{display:none!important}
+  .sheet,.modal{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:18px 18px 0 0;padding:16px;box-shadow:0 -4px 20px rgba(0,0,0,.15);transform:translateY(110%);transition:transform .25s;z-index:20;max-height:88%;overflow-y:auto}
+  .sheet.show,.modal.show{transform:translateY(0)}
+  .shhead{display:flex;align-items:center;margin-bottom:4px}
+  .sh{font-size:15px;font-weight:700}.shx{margin-left:auto;color:var(--sub);font-size:17px;cursor:pointer;padding:0 4px}
+  .sf{font-size:11px;color:var(--sub);margin-bottom:12px}
+  .field{border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;margin-bottom:9px}
+  .field label{font-size:11px;color:var(--sub);display:block;margin-bottom:5px}
+  .field input,.field textarea,.field select{width:100%;border:none;outline:none;font-size:13px;font-family:inherit;background:transparent;color:var(--ink)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:11px;border:1px solid var(--line);border-radius:12px;padding:5px 10px;color:#6b6356;cursor:pointer}
+  .chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .save{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;margin-top:6px;cursor:pointer}
+  .save.sec{background:var(--accent2)}.save.gray{background:#efe9e0;color:#6b6356}.save.danger{background:var(--warn)}
+  .mask{position:absolute;inset:0;background:rgba(0,0,0,.3);z-index:15;display:none}.mask.show{display:block}
+  .vrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.vrow .chip{flex:1;text-align:center}
+  .vprev{width:100%;border-radius:12px;margin-bottom:10px;display:none}
+  .vres{font-size:12px;background:#f6f1ea;border-radius:11px;padding:11px;line-height:1.5;margin-bottom:10px}
+  .conf{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;margin-top:6px}
+  .conf.hi{background:#eaf3de;color:#3b6d11}.conf.lo{background:#fcebeb;color:#a32d2d}
+  textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;outline:none;font-family:inherit;margin-bottom:10px;resize:vertical}
+  .vq{font-size:12px;margin-bottom:10px}.vq .q{color:var(--sub);margin-bottom:5px}.vq .chip{margin:0 6px 6px 0;display:inline-block}
+  .setrow{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}.setrow label{font-size:12px;color:var(--sub)}
+  .setrow input{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;outline:none}
+  .toast{position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(43,38,32,.92);color:#fff;font-size:12px;padding:9px 16px;border-radius:20px;z-index:40;opacity:0;transition:opacity .3s;max-width:310px;text-align:center;pointer-events:none;line-height:1.5}
+  .toast.show{opacity:1}
+  .empty{text-align:center;color:var(--sub);font-size:12px;padding:26px 10px;line-height:1.7}
+  /* —— 养护中心 —— */
+  .stage{background:linear-gradient(135deg,#fff6ec,#fdece0);border:1px solid #f3d9c2;border-radius:14px;padding:12px 13px;margin-bottom:12px}
+  .stage .sh{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:#8a5a2b}
+  .stage .sk{font-size:11px;color:var(--accent);margin:3px 0 8px}
+  .stage ul{list-style:none;margin:0}
+  .stage li{font-size:11.5px;color:#6b5b4a;line-height:1.65;padding-left:13px;position:relative}
+  .stage li:before{content:'·';position:absolute;left:3px;color:var(--accent);font-weight:900}
+  .cdue{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12px;cursor:pointer}
+  .cdue:last-child{border-bottom:none}
+  .cdue .ci2{font-size:16px;width:22px;text-align:center;flex:none}
+  .cdue .cn{flex:1;min-width:0}
+  .cdue .cn b{font-weight:600;font-size:12px}
+  .cdue .cn i{display:block;font-style:normal;font-size:10px;color:var(--sub);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bdg{font-size:10px;padding:3px 7px;border-radius:8px;font-weight:700;flex:none}
+  .bdg.od{background:#fdecec;color:#d9534f}.bdg.tod{background:#fff2e2;color:#e8915b}.bdg.soon{background:#f1f4ee;color:#7b8a6f}.bdg.ok{background:#f3f5f2;color:#9aa392}
+  .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .ccell{background:#fffdfa;border:1px solid var(--line);border-radius:11px;padding:10px;text-align:center;cursor:pointer}
+  .ccell:active{background:#faf4ec}
+  .ccell .e{font-size:18px}.ccell .n{font-size:11px;font-weight:600;margin-top:3px}.ccell .d{font-size:9.5px;color:var(--sub);margin-top:1px}
+  .genbtn{width:100%;border:none;background:linear-gradient(135deg,#e8915b,#d97b45);color:#fff;font-size:12.5px;font-weight:700;padding:11px;border-radius:11px;margin-top:10px;cursor:pointer}
+  .cdet h4{font-size:12px;color:var(--accent);margin:11px 0 4px;font-weight:700}
+  .cdet p{font-size:12px;line-height:1.75;color:#5d5347;white-space:pre-wrap}
+  .cdet .warnbox{background:#fdecec;border-left:3px solid #d9534f;border-radius:0 8px 8px 0;padding:8px 10px;font-size:11.5px;color:#b8453f;line-height:1.6;margin-top:6px}
+  .cdet .errbox{background:#fff8ee;border-left:3px solid #e8915b;border-radius:0 8px 8px 0;padding:8px 10px;font-size:11.5px;color:#8a6338;line-height:1.6;margin-top:4px}
+  .ntab{width:100%;border-collapse:collapse;font-size:11.5px}
+  .ntab th{text-align:left;color:var(--sub);font-weight:600;padding:6px 4px;border-bottom:1px solid var(--line);font-size:10.5px}
+  .ntab td{padding:7px 4px;border-bottom:1px dashed var(--line);line-height:1.5;vertical-align:top}
+  .ntab td:nth-child(2){color:var(--accent2);font-weight:600;white-space:nowrap}
+  .ntab td:nth-child(3){color:var(--sub);font-size:10.5px}
+  .myth{border-bottom:1px dashed var(--line);padding:9px 0}
+  .myth:last-child{border-bottom:none}
+  .myth .q{font-size:12px;font-weight:600;color:#d9534f}.myth .q:before{content:'❌ ';}
+  .myth .a{font-size:11.5px;color:#5d5347;line-height:1.6;margin-top:3px}.myth .a:before{content:'✅ ';}
+  .advbox{background:#f2f7ee;border:1px solid #dbe8d2;border-radius:11px;padding:10px 11px;margin-top:9px}
+  .advbox .at{font-size:11.5px;font-weight:700;color:#5f7a4a;margin-bottom:5px}
+  .advbox li{font-size:11.5px;color:#4f5c44;line-height:1.7;margin-left:15px}
+  .filebtn{display:block;border:1px dashed var(--line);border-radius:11px;padding:13px;text-align:center;font-size:13px;color:var(--accent);cursor:pointer;margin-bottom:10px;background:#fffdfa}
+  .srcbar{display:flex;gap:8px;margin-bottom:10px}
+  .srcbar b{flex:1;text-align:center;font-size:12px;font-weight:600;padding:9px 4px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#5c554a;cursor:pointer}
+  .srcbar b.hot{border-color:var(--accent);color:var(--accent);background:#fffdfa}
+  .srcbar b i{font-style:normal;background:var(--warn);color:#fff;border-radius:8px;padding:0 5px;font-size:10px;margin-left:3px}
+  .framebar{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
+  .framebar span{flex:0 0 auto;font-size:11px;padding:5px 10px;border:1px solid var(--line);border-radius:9px;cursor:pointer;background:#fff}
+  .framebar span.on{border-color:var(--accent);color:var(--accent);background:#fffdfa}
+  .ing{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:9px 2px;cursor:pointer}
+  .ing:last-of-type{border-bottom:none}
+  .ing img{width:52px;height:52px;object-fit:cover;border-radius:9px;flex:0 0 auto;background:#f3efe9}
+  .ing .ph{width:52px;height:52px;border-radius:9px;flex:0 0 auto;background:#f3efe9;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .ing .nm{flex:1;min-width:0;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ing .mt{font-size:10.5px;color:var(--sub);font-weight:400;margin-top:2px;white-space:nowrap}
+  .ing .sk{font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:8px;padding:4px 8px;flex:0 0 auto}
+  .kbitem{border-bottom:1px solid var(--line);padding:11px 2px;cursor:pointer;font-size:13px;display:flex}
+  .kbitem:last-child{border-bottom:none}.kbitem span{margin-left:auto;color:var(--sub)}
+  .kbbody{font-size:12px;color:#5c554a;line-height:1.75;padding:2px 2px 11px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span id="clock">9:41</span><span>📶 🔋</span></div>
+  <div class="topbar"><div class="logo">🐱</div><h1>喵迹</h1><div class="cat" id="catName" onclick="openCatSwitch()">咪咪 ▾</div></div>
+
+  <div class="page" id="p-home"></div>
+  <div class="page hidden" id="p-log"></div>
+  <div class="page hidden" id="p-tl"></div>
+  <div class="page hidden" id="p-ai"></div>
+  <div class="page hidden" id="p-me"></div>
+
+  <div class="nav">
+    <div class="tab on" data-t="home"><div class="ni">🏠</div>首页</div>
+    <div class="tab" data-t="tl"><div class="ni">🕒</div>时间线</div>
+    <div class="fab" data-t="log"><div class="plus">＋</div></div>
+    <div class="tab" data-t="ai"><div class="ni">🤖</div>助手</div>
+    <div class="tab" data-t="me"><div class="ni">👤</div>我的</div>
+  </div>
+
+  <div class="mask" id="mask"></div>
+
+  <div class="sheet" id="sheet">
+    <div class="shhead"><div class="sh" id="shTitle"></div><span class="shx" onclick="closeSheet()">✕</span></div>
+    <div class="sf" id="shSub"></div>
+    <div id="shFields"></div>
+    <div id="shActions"></div>
+  </div>
+
+  <div class="modal" id="visionModal">
+    <div class="shhead"><div class="sh">📷 AI 拍照分析</div><span class="shx" onclick="closeVision()">✕</span></div>
+    <div class="sf">选择类型 → 拍照/选图 → AI 分析 → 你复核后存为记录</div>
+    <div class="vrow" id="vrow"></div>
+    <div class="field hidden" id="calibField">
+      <label>参考物校准（提升准确度）</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin:4px 0">
+        <span class="chip" onclick="setCalib('15')">标准猫碗≈15cm</span>
+        <span class="chip" onclick="setCalib('已放一枚一元硬币，直径约2.4厘米')">一元硬币≈2.4cm</span>
+        <span class="chip" onclick="setCalib('')">清除</span>
+      </div>
+      <input id="calibInput" placeholder="碗直径 cm，如 12；或填：已放一元硬币">
+    </div>
+    <label class="filebtn" for="vfile" id="fileLabel">📷 拍照 / 从相册选择</label>
+    <input type="file" accept="image/*" capture="environment" id="vfile" style="display:none" />
+    <div class="srcbar" id="srcBar"></div>
+    <img class="vprev" id="vprev" />
+    <div class="framebar hidden" id="frameBar"></div>
+    <div class="vres hidden" id="vres"></div>
+    <textarea id="vEdit" class="hidden" rows="5" placeholder="可修改分析结果后再保存"></textarea>
+    <div class="vq hidden" id="vQ"></div>
+    <button class="save sec hidden" id="vSave">保存为记录</button>
+    <button class="save gray" onclick="closeVision()">关闭</button>
+  </div>
+
+  <div class="modal" id="ingestModal">
+    <div class="shhead"><div class="sh">📥 素材盒 · 本地抓取</div><span class="shx" onclick="closeIngest()">✕</span></div>
+    <div class="sf" id="ingestSub">从你的投放目录自动发现摄像头照片/视频</div>
+    <div id="ingestList"></div>
+    <button class="save gray" onclick="refreshIngest()">🔄 重新扫描</button>
+    <button class="save gray" onclick="closeIngest()">关闭</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ================= IndexedDB ================= */
+const DB={name:'miaoji',ver:2,db:null};
+const STORES=['cats','logs','reminders','settings','chats'];
+function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open(DB.name,DB.ver);
+  r.onupgradeneeded=e=>{const db=e.target.result;STORES.forEach(s=>{if(!db.objectStoreNames.contains(s))db.createObjectStore(s,{keyPath:'id'})})};
+  r.onsuccess=e=>{DB.db=e.target.result;res()};r.onerror=e=>rej(e.target.error)})}
+function idbAll(s){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readonly').objectStore(s).getAll();t.onsuccess=()=>res(t.result||[]);t.onerror=e=>rej(e.target.error)})}
+function idbPut(s,o){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readwrite').objectStore(s).put(o);t.onsuccess=()=>res(o);t.onerror=e=>rej(e.target.error)})}
+function idbDel(s,id){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readwrite').objectStore(s).delete(id);t.onsuccess=()=>res();t.onerror=e=>rej(e.target.error)})}
+function idbClear(s){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readwrite').objectStore(s).clear();t.onsuccess=()=>res();t.onerror=e=>rej(e.target.error)})}
+const uid=()=>(Date.now().toString(36)+Math.random().toString(36).slice(2,7));
+const $=id=>document.getElementById(id);
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+/* ================= 常量 ================= */
+const CATS=[
+  {ic:'⚖️',nm:'体重',photo:false},{ic:'🍚',nm:'喂食',photo:'food'},{ic:'💧',nm:'饮水',photo:false},{ic:'🚽',nm:'排泄',photo:'stool'},
+  {ic:'🤮',nm:'呕吐',photo:false,red:true},{ic:'💩',nm:'排便异常',photo:'stool',red:true},{ic:'😺',nm:'精神情绪',photo:'behavior'},{ic:'😴',nm:'睡眠',photo:false},
+  {ic:'🎾',nm:'玩耍互动',photo:false},{ic:'🪮',nm:'梳毛美容',photo:'skin'},{ic:'🪱',nm:'驱虫',photo:false},{ic:'💉',nm:'疫苗',photo:false},
+  {ic:'🏥',nm:'就医病历',photo:false},{ic:'💊',nm:'用药',photo:'med'},{ic:'🤒',nm:'症状不适',photo:'wound',red:true},{ic:'✂️',nm:'绝育手术',photo:false},
+  {ic:'🌡️',nm:'体征体温',photo:false,red:true},{ic:'🔥',nm:'发情',photo:false},{ic:'🏠',nm:'环境变化',photo:'environment'},{ic:'📷',nm:'照片',photo:false},
+  {ic:'⭐',nm:'里程碑',photo:false},{ic:'💰',nm:'花费',photo:false},{ic:'🧳',nm:'寄养出行',photo:false},{ic:'🛡️',nm:'保险',photo:false}
+];
+/* 每个维度的专用字段（事无巨细） */
+const SCH={
+ '体重':[{k:'value',t:'num',l:'体重 (kg)',ph:'3.90',step:'0.01'},{k:'method',t:'chips',l:'测量方式',o:['抱称','宠物秤','医院']}],
+ '喂食':[{k:'food',t:'chips',l:'食物类型',o:['主粮','湿粮','冻干','生骨肉','零食']},{k:'value',t:'num',l:'分量 (g)',ph:'45'},{k:'brand',t:'text',l:'品牌 / 口味',ph:'如 渴望鸡肉'},{k:'eaten',t:'chips',l:'吃完情况',o:['光盘','剩一点','剩大半','没动']}],
+ '饮水':[{k:'value',t:'num',l:'饮水量 (ml)',ph:'120'},{k:'src',t:'chips',l:'来源',o:['水碗','流动饮水机','湿粮补水']}],
+ '排泄':[{k:'kind',t:'chips',l:'类型',o:['小便','大便','两者']},{k:'count',t:'num',l:'次数',ph:'1'},{k:'shape',t:'chips',l:'性状',o:['干硬','成型','偏软','稀水']},{k:'color',t:'text',l:'颜色 / 气味',ph:'棕色，无异味'}],
+ '呕吐':[{k:'count',t:'num',l:'次数',ph:'1'},{k:'content',t:'chips',l:'呕吐物',o:['毛球','未消化食物','黄水','白沫','带血']},{k:'after',t:'chips',l:'呕吐后状态',o:['精神好','萎靡','继续进食','拒食']}],
+ '排便异常':[{k:'kind',t:'chips',l:'异常类型',o:['腹泻','便秘','带血','带黏液','有虫体']},{k:'bristol',t:'chips',l:'Bristol 分级',o:['1','2','3','4','5','6','7']},{k:'days',t:'num',l:'已持续天数',ph:'1'}],
+ '精神情绪':[{k:'mood',t:'chips',l:'状态',o:['活跃','正常','安静','萎靡','焦虑','攻击']},{k:'trigger',t:'text',l:'诱因',ph:'搬家 / 陌生人来访'}],
+ '睡眠':[{k:'value',t:'num',l:'时长 (小时)',ph:'14'},{k:'quality',t:'chips',l:'质量',o:['安稳','易醒','躲藏']}],
+ '玩耍互动':[{k:'value',t:'num',l:'时长 (分钟)',ph:'20'},{k:'toy',t:'chips',l:'方式',o:['逗猫棒','激光','球','抱抱','自嗨']}],
+ '梳毛美容':[{k:'item',t:'chips',l:'项目',o:['梳毛','剪指甲','洗澡','清耳','刷牙']},{k:'shed',t:'chips',l:'掉毛量',o:['少','正常','多','异常多']}],
+ '驱虫':[{k:'kind',t:'chips',l:'类型',o:['体内','体外','内外同驱']},{k:'brand',t:'text',l:'药品 / 品牌',ph:'如 大宠爱'},{k:'weightAt',t:'num',l:'给药时体重 (kg)',ph:'3.9',step:'0.01'}],
+ '疫苗':[{k:'kind',t:'chips',l:'疫苗',o:['猫三联','狂犬','猫瘟单苗','其他']},{k:'dose',t:'chips',l:'针次',o:['第1针','第2针','第3针','年度加强']},{k:'hospital',t:'text',l:'医院 / 批号',ph:''}],
+ '就医病历':[{k:'hospital',t:'text',l:'医院',ph:''},{k:'reason',t:'text',l:'主诉',ph:'呕吐两天'},{k:'diag',t:'text',l:'诊断',ph:''},{k:'advice',t:'ta',l:'医嘱',ph:'用药与复诊安排'},{k:'cost',t:'num',l:'花费 (元)',ph:''}],
+ '用药':[{k:'name',t:'text',l:'药名',ph:''},{k:'dose',t:'text',l:'剂量',ph:'半片 / 次'},{k:'freq',t:'chips',l:'频次',o:['每日1次','每日2次','每日3次','隔日']},{k:'days',t:'num',l:'疗程 (天)',ph:'5'}],
+ '症状不适':[{k:'sym',t:'chips',l:'症状',o:['打喷嚏','流鼻涕','咳嗽','流泪','抓耳','跛行','呼吸急促','抽搐']},{k:'days',t:'num',l:'持续天数',ph:'1'},{k:'temp',t:'num',l:'体温 (℃)',ph:'38.5',step:'0.1'}],
+ '绝育手术':[{k:'hospital',t:'text',l:'医院'},{k:'cost',t:'num',l:'花费 (元)'},{k:'recover',t:'ta',l:'术后恢复记录'}],
+ '体征体温':[{k:'temp',t:'num',l:'体温 (℃)',ph:'38.5',step:'0.1'},{k:'hr',t:'num',l:'心率 (次/分)',ph:'160'},{k:'rr',t:'num',l:'呼吸 (次/分)',ph:'28'},{k:'gum',t:'chips',l:'牙龈颜色',o:['粉红','苍白','发绀','发黄']}],
+ '发情':[{k:'sign',t:'chips',l:'表现',o:['嚎叫','蹭人','翘臀','喷尿','食欲下降']},{k:'days',t:'num',l:'持续天数',ph:'2'}],
+ '环境变化':[{k:'kind',t:'chips',l:'变化',o:['搬家','换猫砂','换粮','新成员','装修','出行']},{k:'react',t:'text',l:'猫的反应',ph:'躲床底半天'}],
+ '照片':[{k:'title',t:'text',l:'标题',ph:'今日可爱瞬间'},{k:'desc',t:'ta',l:'描述'}],
+ '里程碑':[{k:'title',t:'text',l:'里程碑',ph:'第一次上猫爬架'},{k:'desc',t:'ta',l:'描述'}],
+ '花费':[{k:'value',t:'num',l:'金额 (元)',ph:'128'},{k:'kind',t:'chips',l:'类别',o:['猫粮','猫砂','医疗','用品','零食','其他']},{k:'shop',t:'text',l:'渠道',ph:''}],
+ '寄养出行':[{k:'kind',t:'chips',l:'类型',o:['寄养','上门喂','出行','托运']},{k:'days',t:'num',l:'天数',ph:'3'},{k:'cost',t:'num',l:'花费 (元)'},{k:'handover',t:'ta',l:'交接事项'}],
+ '保险':[{k:'company',t:'text',l:'保险公司'},{k:'plan',t:'text',l:'方案 / 保额'},{k:'cost',t:'num',l:'保费 (元/年)'},{k:'expire',t:'date',l:'到期日'}]
+};
+const VISION_TYPES=[['food','🍚 食物营养'],['stool','💩 排泄物'],['skin','🪮 皮肤毛发'],['behavior','😺 行为'],['med','💊 用药'],['wound','🤒 伤口肿块'],['environment','🏠 环境'],['body','⚖️ 体态']];
+const VQ={
+  food:{q:'这顿实际分量接近？',opts:['偏少(<30g)','适中(30-60g)','偏多(>60g)']},
+  stool:{q:'实际形态更接近？',opts:['干硬','正常','软稀']},
+  body:{q:'视觉体重与记录是否一致？',opts:['偏瘦','一致','偏胖']},
+  skin:{q:'皮肤判断是否符合？',opts:['符合','不符(我在备注改)']},
+  wound:{q:'伤口判断是否符合？',opts:['符合','不符(我在备注改)']}
+};
+const RED_RULES=[
+  ['持续呕吐','24h 内 ≥3 次，或呕吐伴精神萎靡 / 拒食'],
+  ['尿闭（急症）','频繁进砂盆无尿、尿团明显变小、蹲盆嚎叫。公猫数小时可致命'],
+  ['呼吸异常','张口呼吸、腹式呼吸、静息呼吸 >40 次/分'],
+  ['抽搐 / 昏迷','任何一次抽搐都需急诊'],
+  ['不食 >24h','成猫 24h、幼猫 12h 不进食即有肝脂肪变风险'],
+  ['牙龈苍白或发黄','提示贫血、失血或黄疸'],
+  ['体温异常','低于 37.5℃ 或高于 39.5℃'],
+  ['便血 / 黑便','消化道出血信号'],
+  ['误食毒物','百合、洋葱、葡萄、木糖醇、巧克力、人类药物']
+];
+const KB_ARTICLES=[
+ {t:'🏠 接猫前的准备清单',c:'必备：猫砂盆（比猫身长1.5倍）、猫砂、食盆水盆（浅口宽口防胡须疲劳）、猫粮、猫包、猫抓板、指甲剪。\n安全：封窗封阳台（隐形防护网）、收好电线与线绳、马桶盖合上、洗衣机检查后再启动。\n环境：先给一个小房间适应 3-7 天，再逐步开放全屋。'},
+ {t:'💉 疫苗与驱虫时间表',c:'猫三联：8 周龄起第 1 针，间隔 3-4 周共 3 针（至 16 周龄），之后每年加强 1 次。\n狂犬：3 月龄起 1 针，每年加强（按当地法规）。\n体内驱虫：幼猫每月 1 次至 6 月龄，之后每 3 个月 1 次。\n体外驱虫：春夏每月 1 次，秋冬可延长至 2-3 个月（纯室内可酌情）。\n注意：疫苗需在猫健康时接种，接种后观察 30 分钟防过敏。'},
+ {t:'🍚 各年龄段喂食量参考',c:'2-4 月龄：自由采食，少量多餐（4-5 餐/天）。\n4-6 月龄：3-4 餐/天，约 60-80g 干粮/天。\n6-12 月龄：2-3 餐/天，约 50-70g/天。\n成猫（1岁+）：2 餐/天，约 40-60g/天，按体重 45-55 kcal/kg 计。\n绝育后代谢降低约 20%，需相应减量防肥胖。\n换粮务必 7 天过渡法，避免腹泻。'},
+ {t:'☠️ 禁忌食物与家中毒物',c:'剧毒：百合科植物（花粉即可致急性肾衰）、洋葱大蒜韭菜（溶血）、葡萄葡萄干（肾衰）、木糖醇、巧克力咖啡因、酒精。\n人药禁用：对乙酰氨基酚（扑热息痛）对猫致命、布洛芬、阿司匹林。\n其他：生鸡蛋清、过量肝脏（维A中毒）、牛奶（乳糖不耐）、骨头碎片。\n家中：百合、绿萝、滴水观音、精油扩香、老鼠药、防冻液。'},
+ {t:'🚨 必须立即就医的信号',c:'1. 公猫排尿困难 / 无尿（尿闭，数小时致命）\n2. 呼吸困难、张口呼吸、舌头发紫\n3. 抽搐、瘫软、意识不清\n4. 连续呕吐 + 不吃不喝超过 24 小时\n5. 牙龈苍白（失血 / 贫血）\n6. 高处坠落、车祸等外伤\n7. 误食毒物（带上包装去医院）\n8. 腹部胀大且触痛'},
+ {t:'🚽 猫砂盆与排泄健康',c:'数量：猫数 +1 个；位置分散、安静、远离食盆。\n清理：每天铲 1-2 次，猫砂每 1-2 周全换。\n健康信号：正常成猫每天 1-2 次大便（成型棕色）、2-4 次小便（尿团大小稳定）。\n异常：尿团突然变小变多 → 泌尿系统问题；便便干硬带血 → 便秘/肛裂；水样便 >2 天 → 就医。\n拒绝用盆常见原因：不干净、位置有压力、砂类型不喜欢、泌尿疼痛（记忆关联）。'},
+ {t:'😿 应激与环境适应',c:'应激表现：躲藏、拒食、过度舔毛、乱尿、瞳孔持续放大、攻击。\n常见诱因：搬家、装修、新成员（人/宠物）、寄养、就医、大声噪音。\n缓解：保持原有物品气味、提供高处与藏身处、费洛蒙扩香、不强行抱、维持喂食节律。\n注意：应激超过 3 天且伴拒食需就医（防脂肪肝）。'},
+ {t:'✂️ 绝育时机与术后护理',c:'时机：一般 6-8 月龄；母猫建议首次发情前后，公猫 6 月龄后。\n好处：降低生殖系统肿瘤、子宫蓄脓风险，减少嚎叫、喷尿、走失。\n术前：禁食 8-12 小时、禁水 2-4 小时（遵医嘱）。\n术后：戴伊丽莎白圈 7-10 天，母猫需观察刀口渗液红肿，公猫保持猫砂干净（可换纸砂）。\n术后 3 天内食欲精神应逐步恢复，否则复诊。'}
+];
+const KB={
+  '呕吐':'单次呕吐若精神好、进食正常，多为一过性（毛球 / 进食过快）。⚠️ 24h 内 ≥3 次、伴精神差 / 不食 / 腹泻请立即就医。建议记录「呕吐」并持续观察。',
+  '疫苗':'幼猫 8 周起打猫三联，每隔 3-4 周一针至 16 周龄，之后每年加强。狂犬按当地要求。记录后可自动推算下次到期日。',
+  '驱虫':'体内驱虫幼猫每月 1 次至 6 月龄，之后每 3 个月；体外春夏每月、秋冬可延长。记录后助手会自动提醒下次。',
+  '喂':'青少年期每日 2-3 餐定时定量（约 50-70g/天分次）。用「记一笔 → 喂食」记录，我据此校准建议。',
+  '百合':'⚠️ 百合对猫剧毒，花粉、叶片极少量即可致急性肾衰竭，家中绝对禁养百合科花卉。',
+  '尿':'公猫尿闭是急症！频繁蹲砂盆、尿团变小或无尿、嚎叫，数小时内可致命，立即就医。',
+  '软便':'偶发软便可先观察、暂缓换粮；持续 >2 天或带血 / 伴呕吐需就医。记录「排便异常」我可分析趋势。',
+  '绝育':'建议 6-8 月龄绝育，降低生殖疾病与走失 / 标记行为。术前禁食遵医嘱，术后戴圈 7-10 天。',
+  '接猫':'接猫先备：猫砂盆+砂、食水盆、猫粮、猫包、抓板。封窗封阳台、收好线绳。先在小房间适应 3-7 天再开放全屋。',
+  '中毒':'剧毒清单：百合科、洋葱大蒜、葡萄、木糖醇、巧克力、酒精；人药中对乙酰氨基酚对猫致命。误食立即带包装就医。'
+};
+const RED_KW=['持续呕吐','尿闭','呼吸','抽搐','不食','不吃','带血','血','苍白','39.5','37.5','瘫','昏迷','误食'];
+
+/* ================= 养护引擎（新手全量提示） =================
+   cy: {k:幼猫(<6月)周期天数, a:成猫周期天数}  0=该阶段不适用  -1=一次性/按需
+   age:[起始月龄, 结束月龄]  auto:是否纳入「一键生成全套提醒」                */
+const CARE_ITEMS=[
+/* —— 每日 —— */
+{id:'litter',ic:'🧹',t:'铲猫砂',grp:'每日',cy:{k:1,a:1},age:[0,999],auto:true,
+ why:'猫极爱干净，砂盆脏会憋尿憋便，是尿闭和便秘的常见诱因；每天铲也是你观察排泄健康最直接的机会。',
+ how:'每天铲 1-2 次。铲的时候看三件事：尿团大小是否稳定、便便是否成型、有没有带血或黏液。',
+ err:'❌ 好几天铲一次 → 猫可能改在床上尿；❌ 只铲不记 → 尿量变化最早期的信号就漏掉了。',
+ sig:'尿团突然变小变多 / 一天没大便 / 便便带血 → 立刻记一笔并观察'},
+{id:'water',ic:'💧',t:'换水 + 洗水碗',grp:'每日',cy:{k:1,a:1},age:[0,999],auto:true,
+ why:'猫祖先来自沙漠，天生口渴感差、喝水少，是慢性肾病高发的根本原因之一。水不新鲜它就更不喝。',
+ how:'每天换新水并用手搓洗碗壁（黏膜要洗掉）。多点位放水：食盆旁反而不爱喝，放在客厅、窗台效果更好。陶瓷/玻璃优于塑料。',
+ err:'❌ 只加不换、不洗碗；❌ 只喂干粮又不管饮水量；❌ 用深口窄碗（胡须疲劳，猫会嫌）。',
+ sig:'饮水量突然暴增（可能糖尿病/肾病/甲亢）或几乎不喝 → 记录并就医'},
+{id:'feed',ic:'🍚',t:'定时定量喂食',grp:'每日',cy:{k:1,a:1},age:[0,999],auto:true,
+ why:'自由采食是室内猫肥胖的头号原因，肥胖直接推高糖尿病、关节炎、脂肪肝风险。定量还能让你第一时间发现食欲下降。',
+ how:'成猫每日约 45-55 kcal/kg，分 2-3 餐；幼猫少量多餐 4-5 顿。用电子秤称，别用"一杯"估。绝育后代谢降约 20%，要减量。',
+ err:'❌ 碗里永远满着；❌ 换粮不过渡（必须 7 天：2天25%→2天50%→2天75%→100%）；❌ 零食超过日热量 10%。',
+ sig:'成猫 24 小时不吃、幼猫 12 小时不吃 → 急！有肝脂肪变风险，必须就医'},
+{id:'play',ic:'🪶',t:'互动玩耍（丰容）',grp:'每日',cy:{k:1,a:1},age:[0,999],auto:true,
+ why:'室内猫最大的健康问题不是病，是无聊。缺乏狩猎输出会转化为肥胖、乱尿、过度舔毛、攻击人。',
+ how:'每天 2 次 × 10-15 分钟逗猫棒，模拟"潜伏→追→扑"。关键：结尾一定要让它抓到并给一小口零食，形成完整狩猎闭环。',
+ err:'❌ 用激光笔当主力（永远抓不到 → 挫败感，可能引发强迫行为）；❌ 用手当玩具（长大后会真咬）。',
+ sig:'突然对玩耍完全没兴趣、平时爱玩的猫变得懒动 → 可能疼痛或生病'},
+{id:'observe',ic:'👀',t:'每日健康三查',grp:'每日',cy:{k:1,a:1},age:[0,999],auto:true,
+ why:'猫是隐藏疼痛的高手，等到明显异常往往已经拖了很久。每天 30 秒的例行观察是新手最高性价比的动作。',
+ how:'查三样：① 吃了多少（跟昨天比）② 拉了几次、什么样 ③ 精神状态（迎人、跳跃、理毛是否照常）。异常就在 App 记一笔。',
+ err:'❌ 只在它"看起来不对"时才关注 → 没有基线，医生问"什么时候开始的"你答不上来。',
+ sig:'躲藏不出、蜷缩在角落、连续两顿不吃 → 大概率已经不舒服'},
+/* —— 每周 —— */
+{id:'weigh',ic:'⚖️',t:'称体重',grp:'每周',cy:{k:7,a:14},age:[0,999],auto:true,
+ why:'体重是猫健康最灵敏的指标。成猫两周内掉 5% 就值得查；幼猫不长秤更是危险信号。',
+ how:'固定时间（建议早饭前）用厨房秤；大猫抱着一起称再减自重。记进 App 会自动画成长曲线。',
+ err:'❌ 只在生病时称 → 没有基线；❌ 用体重秤（精度不够，猫的 0.2kg 相当于人的 5kg）。',
+ sig:'成猫 1 个月内体重变化 >5%（涨或跌都算）→ 建议体检'},
+{id:'brush',ic:'🪮',t:'梳毛',grp:'每周',cy:{k:3,a:3},age:[0,999],auto:true,
+ why:'猫自己舔毛会吞进大量死毛，堆积成毛球 → 呕吐甚至肠梗阻。梳毛是预防毛球最有效的手段，比化毛膏管用。',
+ how:'短毛每周 2-3 次，长毛每天 1 次。顺毛方向，先排梳后针梳。换毛季（春秋）加倍。梳的时候顺手摸一遍全身找肿块。',
+ err:'❌ 逆毛硬梳（疼，猫会记仇）；❌ 长毛猫偷懒 → 打结成毡后只能剃毛。',
+ sig:'摸到硬块、结痂、皮肤发红脱毛 → 拍照用 AI 分析并记录'},
+{id:'teeth',ic:'🦷',t:'刷牙',grp:'每周',cy:{k:3,a:3},age:[0,999],auto:true,
+ why:'3 岁以上的猫约 7 成有牙周病。口腔炎症会持续释放细菌入血，长期损伤心脏和肾脏，而且猫疼了也不会叫。',
+ how:'理想每天，最低每周 3 次。用猫专用指套/软毛刷 + 猫牙膏（可吞咽）。幼猫期就要脱敏训练：先摸嘴 → 再碰牙 → 最后刷。',
+ err:'❌ 用人牙膏（含氟/木糖醇，对猫有毒）；❌ 觉得"啃猫粮能洁牙"（干粮基本无洁牙作用）。',
+ sig:'口臭明显、流口水、单侧咀嚼、牙龈红线、掉牙 → 需口腔检查'},
+{id:'bowl',ic:'🍽',t:'洗食盆水盆',grp:'每周',cy:{k:2,a:2},age:[0,999],auto:true,
+ why:'食盆残留油脂 3 天就会形成菌膜，是猫下巴长黑点（猫痤疮）和拉肚子的常见原因。',
+ how:'每次餐后擦，每周至少 2 次用洗洁精+热水彻底洗。优先陶瓷或不锈钢，塑料碗划痕藏菌且易致痤疮。',
+ err:'❌ 只用清水冲；❌ 用塑料碗还从不换。',
+ sig:'下巴出现黑色颗粒（像黑头）→ 换陶瓷碗并加强清洗'},
+/* —— 每两周 / 每月 —— */
+{id:'nail',ic:'✂️',t:'剪指甲',grp:'每两周',cy:{k:14,a:18},age:[0,999],auto:true,
+ why:'室内猫磨爪不足，指甲会过长弯曲刺进肉垫，引起疼痛和感染；也能减少家具和你的损失。',
+ how:'每 2-3 周一次。只剪透明的尖端，避开粉红色血线（留 2mm 安全距离）。趁它睡醒犯困时，一次剪两三个爪就够，不用一次剪完。',
+ err:'❌ 剪到血线（会流血且从此抗拒）；❌ 用人的指甲刀（会劈裂）；❌ 剪后爪（一般不需要，后爪磨损快）。',
+ sig:'剪出血别慌：用止血粉或干面粉按压 1 分钟即可'},
+{id:'ear',ic:'👂',t:'检查耳朵',grp:'每两周',cy:{k:14,a:14},age:[0,999],auto:true,
+ why:'耳螨在幼猫中极常见，会痒到猫抓破耳后流血；中耳感染还可能影响平衡。',
+ how:'每 2 周翻开耳廓看：健康是淡粉色、几乎无味、少量浅褐耳垢。用猫专用洗耳液滴入后揉耳根，让它自己甩出来再擦外耳。',
+ err:'❌ 用棉签往深处捅（会把脏东西推进耳道甚至戳伤鼓膜）；❌ 用酒精/双氧水。',
+ sig:'黑色咖啡渣样耳垢 = 耳螨；异味+黄色分泌物 = 感染；频繁甩头抓耳 → 就医'},
+{id:'flea',ic:'🪟',t:'体外驱虫',grp:'每月',cy:{k:30,a:30},age:[1.5,999],auto:true,
+ why:'跳蚤不只是痒，还是绦虫的中间宿主，一只跳蚤能让猫感染肠道寄生虫。你的鞋和裤腿就能把虫卵带回家——纯室内猫也不能免。',
+ how:'滴剂滴在后颈皮肤上（舔不到的位置），滴后 48 小时不洗澡。春夏每月 1 次；秋冬纯室内可延长至 2-3 个月。',
+ err:'❌ 觉得"不出门就不用"；❌ 滴在毛上没到皮肤（无效）；❌ 用狗的驱虫药（含拟除虫菊酯，对猫剧毒致命）。',
+ sig:'毛根部见黑色小颗粒（跳蚤粪，沾水变红）→ 立即全屋处理'},
+{id:'litterfull',ic:'🪣',t:'全换猫砂 + 刷砂盆',grp:'每月',cy:{k:14,a:14},age:[0,999],auto:true,
+ why:'砂盆底部会积尿垢和细菌，异味会让猫拒绝使用，从而在别处排泄或憋尿。',
+ how:'每 1-2 周倒空全换，用热水+温和洗剂刷洗晾干。砂盆数量 = 猫数 + 1，分散摆放、远离食盆和洗衣机。',
+ err:'❌ 用漂白水/浓香清洁剂（气味残留猫会拒用）；❌ 只有一个砂盆还放在角落封闭处。',
+ sig:'猫在盆外排泄 → 先排查砂盆清洁/位置/砂类型，再考虑泌尿疾病'},
+{id:'bodycheck',ic:'🔍',t:'全身体表检查',grp:'每月',cy:{k:30,a:30},age:[0,999],auto:true,
+ why:'早期肿块、皮肤病、寄生虫都靠摸出来。猫的肿瘤长在皮下时，越早发现处理越简单。',
+ how:'趁它放松时从头到尾捋一遍：下巴、颈部、腋下、腹部、大腿内侧、尾根。感觉硬结、脱毛、结痂、红肿就拍照记录。',
+ err:'❌ 只看不摸（长毛猫看不出来）；❌ 发现小肿块就"再观察观察"拖几个月。',
+ sig:'任何新出现的硬块、快速变大的包、久不愈合的伤口 → 就医'},
+{id:'bath',ic:'🛁',t:'洗澡',grp:'按需',cy:{k:0,a:90},age:[4,999],auto:true,
+ why:'猫会自己理毛，健康室内短毛猫其实很少需要洗澡。洗太勤会破坏皮脂膜，反而导致皮屑、干痒、掉毛。',
+ how:'短毛室内猫每 2-3 个月甚至半年一次即可；长毛猫或明显脏了 1-2 个月一次。必须用猫专用香波（猫皮肤 pH 约 6.5，人的沐浴露会伤皮肤屏障）。水温 38℃ 左右，洗后必须彻底吹干（湿着最容易得猫癣）。',
+ err:'❌ 每周洗；❌ 用人的洗发水/沐浴露；❌ 洗完自然晾干 → 猫癣温床；❌ 疫苗未完成、刚到家、生病、刚驱虫 48 小时内洗澡。',
+ sig:'洗澡后持续发抖、精神差 → 可能着凉，注意保暖观察'},
+/* —— 每季 / 每年 —— */
+{id:'dewormin',ic:'🪱',t:'体内驱虫',grp:'每季',cy:{k:30,a:90},age:[1,999],auto:true,
+ why:'蛔虫、绦虫会抢营养、引起腹泻消瘦，部分还是人畜共患（弓形虫、蛔虫幼虫移行症），家里有小孩老人更要按时。',
+ how:'幼猫每月 1 次直到 6 月龄，之后每 3 个月 1 次。按体重精确给药，吃后观察排便。生食/散养/抓虫子的猫要加密。',
+ err:'❌ 按"包装说明一颗"不称重给药；❌ 只做体外不做体内；❌ 空腹给药（部分药易引起呕吐，建议餐后）。',
+ sig:'便便里见白色米粒状节片（绦虫）、腹部鼓胀消瘦、拉肚子带黏液 → 加做粪检'},
+{id:'vaccine',ic:'💉',t:'疫苗加强',grp:'每年',cy:{k:0,a:365},age:[4,999],auto:true,
+ why:'猫瘟（泛白细胞减少症）幼猫死亡率极高，且病毒在环境中可存活一年以上——你从外面带回来就够了。纯室内猫同样必须打。',
+ how:'幼猫 8 周龄起猫三联，间隔 3-4 周共 3 针至 16 周龄；之后每年加强 1 针。狂犬 3 月龄起、每年 1 针。接种当天必须健康无腹泻，打完留院观察 30 分钟防过敏。',
+ err:'❌ "不出门不用打"；❌ 刚到家没适应就打（应激叠加易发病）；❌ 打疫苗同时洗澡/驱虫。',
+ sig:'接种后 24 小时内面部肿胀、呕吐、呼吸急促 → 过敏反应，立即回医院'},
+{id:'checkup',ic:'🩺',t:'年度体检',grp:'每年',cy:{k:0,a:365},age:[6,999],auto:true,
+ why:'猫会把病藏到最后一刻。慢性肾病早期毫无症状，等到多饮多尿时肾功能已经损失 2/3。血检是唯一能提前发现的方式。',
+ how:'成猫每年 1 次：血常规 + 生化 + 尿检，建议加 SDMA（早期肾指标）。7 岁以上每半年 1 次，加甲状腺 T4 和血压。',
+ err:'❌ 只做"看一眼摸一摸"的表检；❌ 觉得年轻不用查（没有基线，将来数值异常也看不出趋势）。',
+ sig:'7 岁后出现多饮多尿、变瘦但食量大、叫声变多 → 优先查肾和甲状腺'},
+{id:'dental',ic:'😬',t:'口腔评估 / 洁牙',grp:'每年',cy:{k:0,a:365},age:[12,999],auto:true,
+ why:'牙结石一旦形成，刷牙就刷不掉了，只能麻醉超声洁牙。拖到牙周炎会掉牙、疼到不吃饭。',
+ how:'年度体检时让医生翻嘴检查，按需洁牙。日常靠刷牙 + 洁牙零食/水添加剂延缓。',
+ err:'❌ 因为"要麻醉"一直拖 → 结果拖到需要拔牙；❌ 用硬骨头/鹿角"磨牙"（会崩牙）。',
+ sig:'口臭、流涎、进食时歪头、碰嘴就躲 → 口腔已有明显问题'},
+/* —— 一次性里程碑 —— */
+{id:'firstvet',ic:'🏥',t:'到家后首次体检',grp:'一次性',cy:{k:-1,a:-1},age:[0,999],auto:false,
+ why:'新猫最常见的是猫瘟、杯状、耳螨、体内寄生虫和猫癣。潜伏期常在到家后 3-7 天发作，先做筛查能避免最惨的结果。',
+ how:'接回家 3-7 天内（先让它适应 2-3 天再去，除非有明显症状）。查：猫瘟/杯状快检、粪检、真菌灯、体重体温。',
+ err:'❌ 到家立刻打疫苗（应激期免疫力低）；❌ 家里已有猫却不隔离新猫（必须隔离观察 2 周）。',
+ sig:'到家后出现拉稀、连续打喷嚏、不吃 → 立即就医，别等'},
+{id:'neuter',ic:'✂️',t:'绝育',grp:'一次性',cy:{k:-1,a:-1},age:[6,14],auto:false,
+ why:'母猫绝育可几乎消除子宫蓄脓和大幅降低乳腺肿瘤风险；公猫可避免喷尿标记、嚎叫和为找配偶跳窗走失。这是延长猫寿命最确定的一件事。',
+ how:'一般 6-8 月龄。母猫建议首次发情前后，公猫 6 月龄后睾丸发育完成即可。术前禁食 8-12 小时、禁水 2-4 小时（遵医嘱）。术后戴伊丽莎白圈 7-10 天，公猫换纸砂或不用砂。',
+ err:'❌ "让它生一窝再绝育"（毫无健康益处，反增风险）；❌ 术后偷偷摘圈 → 舔开刀口二次手术；❌ 绝育后不减食量 → 半年胖成球。',
+ sig:'术后刀口渗液发红、持续 3 天不吃不动 → 复诊'},
+{id:'foodswitch',ic:'🔄',t:'幼猫粮 → 成猫粮',grp:'一次性',cy:{k:-1,a:-1},age:[10,15],auto:false,
+ why:'幼猫粮热量和蛋白密度高，成年后继续吃会迅速肥胖；但换早了又会影响发育。',
+ how:'约 12 月龄换（大型猫种如缅因可延到 15 月龄）。7 天过渡法：2天25%→2天50%→2天75%→全新粮。绝育猫可选绝育配方。',
+ err:'❌ 一天直接换完 → 腹泻；❌ 12 月还在吃幼猫粮又自由采食。',
+ sig:'换粮期间软便 1-2 天正常，超过 3 天或带血 → 退回原粮并就医'},
+{id:'social',ic:'🫶',t:'社会化训练（黄金期）',grp:'一次性',cy:{k:-1,a:-1},age:[0,4],age2:'2-9 周龄是关键窗口',auto:false,
+ why:'猫的社会化窗口在 2-9 周龄，这段时间接触过的人、声音、触碰方式，会决定它一辈子怕不怕人、能不能剪指甲、去医院会不会崩溃。错过后很难补。',
+ how:'每天温和抱一会儿；主动摸爪子、碰耳朵、翻嘴巴（为将来剪甲刷牙铺路）；让它听吸尘器、门铃等日常噪音；提前让它熟悉猫包（平时当窝放着，别只在去医院时拿出来）。',
+ err:'❌ 只在去医院时拿出猫包 → 一见猫包就躲；❌ 强行抱到它挣扎（会形成"被抱=不好"的记忆）。',
+ sig:'过了社会化期仍极度怕人，需要用零食做长期脱敏，不要硬来'}
+];
+/* 阶段重点：按月龄推送 */
+const CARE_STAGES=[
+ {max:2,n:'奶猫期（0-2 月）',k:'保命阶段',
+  li:['保暖第一：2 周内需 30℃ 环境，低体温比饥饿更致命','未满月需羊奶粉每 2-3 小时一喂，绝不能喂牛奶','3 周内需人工用湿棉签刺激肛门帮助排泄','4 周起可加泡软猫粮开始断奶','此阶段不驱虫不疫苗，先长稳']},
+ {max:4,n:'社会化期（2-4 月）',k:'性格定型的黄金窗口',
+  li:['8 周龄起打第一针猫三联，间隔 3-4 周共 3 针','每月一次体内驱虫','多摸爪子/耳朵/嘴巴，为将来剪甲刷牙脱敏','让它熟悉猫包、吸尘器声、陌生人','少量多餐 4-5 顿，自由采食可接受']},
+ {max:6,n:'换牙期（4-6 月）',k:'爱咬东西是正常的',
+  li:['开始换牙，会到处啃咬——给磨牙玩具而不是骂它','16 周龄完成疫苗全程','可以开始规划绝育（6-8 月龄）','喂食减到 3-4 餐/天','偶尔发现掉落的乳牙属正常，不用捡']},
+ {max:12,n:'青少年期（6-12 月）',k:'绝育与体重管理关键期',
+  li:['6-8 月龄绝育，母猫首次发情前后最佳','绝育后代谢降约 20%，食量要相应减少','约 12 月龄换成猫粮，7 天过渡','精力最旺盛，每天必须两次高强度玩耍','体内驱虫改为每 3 个月一次']},
+ {max:84,n:'成年期（1-7 岁）',k:'看似最省心，其实要建基线',
+  li:['每年疫苗加强 + 年度体检（血常规+生化+尿检）','体重管理是核心：理想 BCS 4-5/9，摸得到肋骨但看不见','刷牙习惯要坚持，3 岁后牙周病高发','每月摸一遍全身找肿块','保持丰容：猫爬架、窗台观景位、食物益智玩具']},
+ {max:999,n:'老年期（7 岁+）',k:'从"每年"改成"每半年"',
+  li:['体检频率提到每半年，加查甲状腺 T4 和血压','重点盯三件事：肾病、甲亢、关节炎','多饮多尿 / 吃很多却变瘦 → 优先查肾和甲状腺','跳不上以前爱去的地方 = 关节炎信号，不是"变懒"','砂盆换低边款，垫子加厚，水碗多设几处']}
+];
+/* 新手常见误区 */
+const CARE_MYTHS=[
+ ['给猫喝牛奶','绝大多数成猫乳糖不耐，会腹泻。要喂就用猫专用羊奶粉。'],
+ ['纯室内不用打疫苗/驱虫','猫瘟病毒能在环境存活一年以上，你的鞋底就能带回家。跳蚤卵同理。'],
+ ['用人的沐浴露洗澡','人皮肤 pH 约 5.5，猫约 6.5。用错会破坏皮脂膜，引起皮屑和顽固瘙痒。'],
+ ['经常洗澡才干净','短毛室内猫 2-3 个月甚至半年一次就够。洗太勤反而掉毛长癣。'],
+ ['干粮能洁牙','基本无效。真正有用的是刷牙。'],
+ ['猫不喝水是正常的','是天性但不是好事，慢性肾病的重要推手。要用湿粮、流动水、多点位摆放去哄它喝。'],
+ ['一个猫砂盆够了','标准是猫数+1，且分散摆放。数量不足是乱尿的常见原因。'],
+ ['猫感冒了喂点人药','对乙酰氨基酚（扑热息痛）对猫是致命毒药，布洛芬、阿司匹林同样禁用。任何人药都别给。'],
+ ['让它生一窝对身体好','没有任何健康益处，反而增加难产、乳腺肿瘤和子宫蓄脓风险。'],
+ ['猫抓家具要打骂','惩罚只会让它怕你，不会改行为。正确做法是提供更合适的猫抓板并放在它常抓的位置旁边。'],
+ ['狗的驱虫药便宜可以共用','含拟除虫菊酯的犬用驱虫药对猫剧毒，可致抽搐死亡。'],
+ ['激光笔是最好的玩具','永远抓不到会造成挫败感，可能诱发强迫行为。用逗猫棒且结尾一定让它抓到。'],
+ ['家里养百合没事，猫不吃就行','百合花粉沾到毛上，理毛时舔进去就足以引起急性肾衰。必须完全不养。'],
+ ['猫掉毛就是缺营养','换毛季掉毛正常。但局部脱毛+结痂多为猫癣或过敏，要看医生。'],
+ ['幼猫可以自由吃到饱','幼猫可以，成猫不行。1 岁后继续自由采食是肥胖首因。']
+];
+/* 正常值速查 */
+const CARE_NORMS=[
+ ['体温','38.0 – 39.2 ℃','<37.5 或 >39.5 需就医'],
+ ['心率','140 – 220 次/分','安静状态测量'],
+ ['呼吸','20 – 30 次/分','静息 >40 或张口呼吸 = 急症'],
+ ['牙龈','淡粉色，按压 2 秒内回血','苍白=贫血 发黄=黄疸 发绀=缺氧'],
+ ['饮水量','每公斤 40-60 ml/天','突然翻倍要查肾/糖尿/甲亢'],
+ ['排尿','2 – 4 次/天，尿团大小稳定','变小变多 = 泌尿问题预警'],
+ ['排便','1 – 2 次/天，成型棕色','Bristol 3-4 型为理想'],
+ ['体重变化','成猫月波动 <5%','掉 5% 以上必须查'],
+ ['幼猫增重','每周 +50 – 100 g','不长秤是危险信号'],
+ ['成猫体型','BCS 4-5/9','摸得到肋骨、看不见肋骨、有腰线']
+];
+/* 到家第一周清单 */
+const CARE_FIRSTWEEK=[
+ ['Day 0 · 到家前','封窗封阳台（隐形防护网）、收好电线细绳、马桶盖合上、移走百合等有毒植物、准备好独立小房间'],
+ ['Day 0 · 到家当天','把猫包放地上自己开门让它出来，别抱出来。放好砂盆水食，然后离开房间，别围观别撸。'],
+ ['Day 1-3 · 适应期','待在小房间。你每天进去安静坐几次，不主动伸手。观察吃喝拉撒是否正常。此时不洗澡不打针。'],
+ ['Day 3-7 · 首检','去医院做猫瘟/杯状快检 + 粪检 + 真菌灯。家里有其他猫必须隔离满 2 周。'],
+ ['Day 7-14 · 扩圈','开始开放其他房间，但保留原房间作为安全区。可以开始每日玩耍互动。'],
+ ['Day 14+ · 常规化','健康无异常后开始疫苗程序和驱虫。建立喂食、玩耍、称重的固定节律。']
+];
+function catMonths(){
+  if(!S.cat||!S.cat.birth)return 12;
+  return Math.max(0,(Date.now()-new Date(S.cat.birth).getTime())/(30.44*86400000));
+}
+function careCycleOf(it){const m=catMonths();const c=m<6?it.cy.k:it.cy.a;return c}
+function careApplicable(it){const m=catMonths();return m>=it.age[0]&&m<=it.age[1]&&careCycleOf(it)!==0}
+function curStage(){const m=catMonths();return CARE_STAGES.find(s=>m<=s.max)||CARE_STAGES[CARE_STAGES.length-1]}
+
+/* ================= 状态 ================= */
+let S={cat:null,cats:[],logs:[],reminders:[],chats:[],settings:{workerUrl:'',assistantOn:true,catId:'c1',refBowlCm:12,ingestUrl:''}};
+let tlFilter='全部', curveRange=90;
+
+/* ================= 种子 ================= */
+async function seedIfEmpty(){
+  const cats=await idbAll('cats'); if(cats.length)return;
+  await idbPut('cats',{id:'c1',name:'咪咪',breed:'英短',sex:'母',birth:'2025-10-01',weight:3.9,neutered:'未绝育'});
+  const now=Date.now(),D=86400000;
+  const ws=[[0,0.12],[30,0.45],[60,0.95],[90,1.6],[120,2.2],[150,2.7],[180,3.1],[210,3.4],[240,3.6],[270,3.8],[300,3.9]];
+  for(const [d,w] of ws) await idbPut('logs',{id:uid(),cat_id:'c1',ts:now-d*D,type:'体重',status:'正常',note:w+'kg',data:{value:w},photos:[]});
+  await idbPut('logs',{id:uid(),cat_id:'c1',ts:now-5*D,type:'驱虫',status:'正常',note:'体内 · 拜耳',data:{kind:'体内',brand:'拜耳'},photos:[]});
+  await idbPut('logs',{id:uid(),cat_id:'c1',ts:now-17*D,type:'就医病历',status:'异常',note:'肠胃不适，医嘱用药5天',data:{reason:'呕吐两天',diag:'肠胃不适'},photos:[]});
+  await idbPut('logs',{id:uid(),cat_id:'c1',ts:now-25*D,type:'里程碑',status:'正常',note:'第一次上猫爬架',data:{title:'第一次上猫爬架'},photos:[]});
+  const rem=[{id:uid(),cat_id:'c1',type:'疫苗',label:'💉 年度疫苗',lastTs:now-342*D,cycle:365},
+             {id:uid(),cat_id:'c1',type:'驱虫',label:'🪱 体内驱虫',lastTs:now-5*D,cycle:90},
+             {id:uid(),cat_id:'c1',type:'驱虫',label:'🪟 体外驱虫',lastTs:now-12*D,cycle:30},
+             {id:uid(),cat_id:'c1',type:'体检',label:'🩺 年度体检',lastTs:now-230*D,cycle:365}];
+  for(const r of rem) await idbPut('reminders',r);
+  await idbPut('settings',{id:'cfg',workerUrl:'',assistantOn:true,catId:'c1',refBowlCm:12,ingestUrl:''});
+  await idbPut('chats',{id:uid(),cat_id:'c1',ts:now-60000,role:'me',text:'咪咪今天吐了一次，要紧吗？'});
+  await idbPut('chats',{id:uid(),cat_id:'c1',ts:now-59000,role:'ai',text:KB['呕吐']});
+}
+
+/* ================= 加载 ================= */
+async function load(){
+  const st=await idbAll('settings'); S.settings=st[0]||{id:'cfg',workerUrl:'',assistantOn:true,catId:'c1',refBowlCm:12,ingestUrl:''};
+  S.cats=await idbAll('cats');
+  S.cat=S.cats.find(c=>c.id===S.settings.catId)||S.cats[0]||null;
+  const all=await idbAll('logs'); S.logs=S.cat?all.filter(l=>l.cat_id===S.cat.id):[];
+  const rem=await idbAll('reminders'); S.reminders=S.cat?rem.filter(r=>r.cat_id===S.cat.id):[];
+  const ch=await idbAll('chats'); S.chats=(S.cat?ch.filter(c=>c.cat_id===S.cat.id):[]).sort((a,b)=>a.ts-b.ts);
+  $('catName').textContent=(S.cat?S.cat.name:'未建档案')+' ▾';
+}
+function refreshAll(){renderHome();renderTimeline();renderLog();renderMe();renderAI();}
+
+/* ================= 工具 ================= */
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400)}
+function fmt(d){const x=new Date(d);return (x.getMonth()+1)+'-'+x.getDate()}
+function fmtFull(d){return new Date(d).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function daysBetween(a,b){return Math.round((a-b)/86400000)}
+function pad(n){return String(n).padStart(2,'0')}
+function toLocalInput(ts){const d=new Date(ts);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`}
+function fromLocalInput(v){const t=new Date(v).getTime();return isNaN(t)?Date.now():t}
+function wVal(l){return l.data&&l.data.value!=null?parseFloat(l.data.value):parseFloat(l.note)}
+function tickClock(){const d=new Date();$('clock').textContent=d.getHours()+':'+pad(d.getMinutes())}
+
+/* ================= 通用 Sheet ================= */
+let _acts=[];
+function openSheet(o){
+  $('shTitle').textContent=o.title||'';
+  $('shSub').textContent=o.sub||'';
+  $('shFields').innerHTML=o.html||'';
+  _acts=o.actions||[{label:'关闭',cls:'gray',fn:closeSheet}];
+  $('shActions').innerHTML=_acts.map((a,i)=>`<button class="save ${a.cls||''}" data-act="${i}">${a.label}</button>`).join('');
+  $('shActions').querySelectorAll('button').forEach(b=>b.onclick=()=>{const a=_acts[+b.dataset.act];if(a&&a.fn)a.fn()});
+  $('sheet').scrollTop=0;
+  $('mask').classList.add('show');$('sheet').classList.add('show');
+  if(o.onOpen)o.onOpen();
+}
+function closeSheet(){$('mask').classList.remove('show');$('sheet').classList.remove('show')}
+/* 全局单选 chips 委托 */
+document.addEventListener('click',e=>{
+  const c=e.target.closest('.chips.single .chip');
+  if(c){c.parentElement.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on')}
+});
+
+/* ================= 字段渲染 ================= */
+function renderFields(schema,data){
+  data=data||{};
+  return schema.map(f=>{
+    const v=data[f.k]==null?'':data[f.k];
+    if(f.t==='chips')return `<div class="field"><label>${f.l}</label><div class="chips single" data-k="${f.k}">${f.o.map(o=>`<span class="chip ${String(v)===o?'on':''}">${o}</span>`).join('')}</div></div>`;
+    if(f.t==='ta')return `<div class="field"><label>${f.l}</label><textarea data-k="${f.k}" rows="3" style="border:none;padding:0;margin:0" placeholder="${f.ph||''}">${esc(v)}</textarea></div>`;
+    const type=f.t==='num'?'number':(f.t==='date'?'date':'text');
+    return `<div class="field"><label>${f.l}</label><input data-k="${f.k}" type="${type}" ${f.step?'step="'+f.step+'"':''} placeholder="${f.ph||''}" value="${esc(v)}"></div>`;
+  }).join('');
+}
+function collectFields(rootId){
+  const out={},root=$(rootId);
+  root.querySelectorAll('[data-k]').forEach(el=>{
+    if(el.classList.contains('chips')){const on=el.querySelector('.chip.on');if(on)out[el.dataset.k]=on.textContent}
+    else if(el.value!=='')out[el.dataset.k]=el.value;
+  });
+  return out;
+}
+function buildNote(type,data){
+  const sch=SCH[type]||[];
+  if(type==='体重')return (data.value||'?')+'kg'+(data.method?' · '+data.method:'');
+  const parts=sch.filter(f=>data[f.k]!=null&&data[f.k]!=='').map(f=>{
+    const unit=(f.l.match(/\(([^)]+)\)/)||[])[1]||'';
+    const name=f.l.replace(/\s*\([^)]*\)/,'');
+    return `${name}:${data[f.k]}${unit&&f.t==='num'?unit:''}`;
+  });
+  return parts.join(' · ')||type;
+}
+
+/* ================= 首页 ================= */
+function renderHome(){
+  if(!S.cat){$('p-home').innerHTML=`<div class="empty">还没有猫咪档案<br><br><span class="chip" onclick="openAddCat()">➕ 建立第一份档案</span></div>`;return}
+  const weights=S.logs.filter(l=>l.type==='体重').sort((a,b)=>a.ts-b.ts);
+  const last=weights[weights.length-1],prev=weights[weights.length-2];
+  const trend=last&&prev?(wVal(last)-wVal(prev)).toFixed(2):'0.00';
+  const tUp=parseFloat(trend)>=0;
+  const abn=S.logs.filter(l=>Date.now()-l.ts<30*86400000&&l.status==='异常');
+  const health=Math.max(60,100-abn.length*8);
+  let minD=null,nextLabel='—';
+  S.reminders.forEach(r=>{const d=daysBetween(r.lastTs+r.cycle*86400000,Date.now());if(minD===null||d<minD){minD=d;nextLabel=r.label}});
+  const todo=S.reminders.filter(r=>daysBetween(r.lastTs+r.cycle*86400000,Date.now())<=3);
+  const recent=S.logs.slice().sort((a,b)=>b.ts-a.ts).slice(0,4);
+  $('p-home').innerHTML=`
+    <div class="kpis">
+      <div class="kpi" onclick="drillWeight()"><div class="l">当前体重 <i>›</i></div><div class="v">${last?wVal(last)+'<span style="font-size:12px;color:var(--sub)">kg</span>':'—'}</div><div class="t ${tUp?'up':'down'}">${tUp?'▲':'▼'} 环比 ${trend}kg</div></div>
+      <div class="kpi" onclick="drillHealth()"><div class="l">健康评分 <i>›</i></div><div class="v">${health}</div><div class="t flat">近 30 天 ${abn.length} 次异常</div></div>
+      <div class="kpi" onclick="go('tl')"><div class="l">距下次提醒 <i>›</i></div><div class="v" style="color:${minD!==null&&minD<=3?'var(--warn)':'var(--ink)'}">${minD===null?'—':minD}<span style="font-size:12px;color:var(--sub)">天</span></div><div class="t down">${nextLabel}</div></div>
+      <div class="kpi" onclick="drillTodo()"><div class="l">今日待办 <i>›</i></div><div class="v">${todo.length}</div><div class="t flat">提醒 / 用药</div></div>
+    </div>
+    ${buildCarePanel()}
+    <div class="card"><h2>📈 成长曲线 <span class="tag">点圆点看详情</span><span class="act" onclick="openLog('体重')">＋ 记体重</span></h2>
+      <div class="filt">${[30,90,365,0].map(r=>`<span class="${curveRange===r?'on':''}" onclick="setRange(${r})">${r===0?'全部':'近'+r+'天'}</span>`).join('')}</div>
+      ${buildCurve(weights)}</div>
+    <div class="card"><h2>⏰ 提醒 <span class="act" onclick="openAddReminder()">＋ 新增</span></h2>
+      ${S.reminders.length?S.reminders.map(r=>{const d=daysBetween(r.lastTs+r.cycle*86400000,Date.now());
+        return `<div class="rrow" onclick="openReminder('${r.id}')"><span>${r.label}<br><span style="font-size:10px;color:var(--sub)">每 ${r.cycle} 天 · 上次 ${fmt(r.lastTs)}</span></span><span style="color:${d<=3?'var(--warn)':'var(--accent2)'};font-weight:600">${d<=0?(d===0?'今天':Math.abs(d)+'天前逾期'):d+'天后'} ›</span></div>`}).join(''):'<div class="empty">暂无提醒，点右上角新增</div>'}</div>
+    <div class="card"><h2>🕒 最近记录 <span class="act" onclick="go('tl')">查看全部 ›</span></h2>
+      ${recent.length?`<ul class="tl">${recent.map(l=>`<li onclick="openLogDetail('${l.id}')"><span class="tl-date">${fmt(l.ts)}</span><span class="dot" style="background:${l.status==='异常'?'var(--warn)':'var(--accent)'}"></span><span class="tx">${esc(l.type)}：${esc(l.note)}</span><span class="ar">›</span></li>`).join('')}</ul>`:'<div class="empty">还没有记录，点底部 ＋ 记一笔</div>'}</div>`;
+}
+function setRange(r){curveRange=r;renderHome()}
+function buildCurve(ws){
+  let d=ws;
+  if(curveRange>0)d=ws.filter(l=>Date.now()-l.ts<=curveRange*86400000);
+  if(d.length<2)return '<div class="empty">该区间记录不足 2 条，换个范围或多记几次体重</div>';
+  const W=320,H=150,pad=24,vals=d.map(wVal);
+  const min=Math.min(...vals)*0.9,max=Math.max(...vals)*1.05,span=max-min||1;
+  const px=i=>pad+i*(W-2*pad)/(d.length-1),py=v=>H-pad-(v-min)/span*(H-2*pad);
+  const pts=d.map((l,i)=>`${px(i).toFixed(1)},${py(vals[i]).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%">
+    <polygon points="${pad},${H-pad} ${pts} ${W-pad},${H-pad}" fill="#e8915b" opacity=".1"/>
+    <polyline fill="none" stroke="#e8915b" stroke-width="2.5" points="${pts}"/>
+    ${d.map((l,i)=>`<circle class="pt" cx="${px(i).toFixed(1)}" cy="${py(vals[i]).toFixed(1)}" r="7" fill="transparent" onclick="openLogDetail('${l.id}')"/><circle cx="${px(i).toFixed(1)}" cy="${py(vals[i]).toFixed(1)}" r="3" fill="#e8915b" style="pointer-events:none"/>`).join('')}
+    <text x="${pad}" y="14" font-size="10" fill="#938a7c">${max.toFixed(2)}kg</text>
+    <text x="${pad}" y="${H-6}" font-size="10" fill="#938a7c">${fmt(d[0].ts)} → ${fmt(d[d.length-1].ts)}</text>
+  </svg>`;
+}
+function drillWeight(){
+  const ws=S.logs.filter(l=>l.type==='体重').sort((a,b)=>b.ts-a.ts);
+  openSheet({title:'⚖️ 体重明细',sub:`共 ${ws.length} 条记录，点任意一条可编辑`,
+    html:ws.length?`<ul class="tl">${ws.map(l=>`<li onclick="openLogDetail('${l.id}')"><span class="tl-date">${fmt(l.ts)}</span><span class="tx">${wVal(l)} kg</span><span class="ar">›</span></li>`).join('')}</ul>`:'<div class="empty">暂无体重记录</div>',
+    actions:[{label:'＋ 记一笔体重',fn:()=>{closeSheet();openLog('体重')}},{label:'关闭',cls:'gray',fn:closeSheet}]});
+}
+function drillHealth(){
+  const abn=S.logs.filter(l=>Date.now()-l.ts<30*86400000&&l.status==='异常').sort((a,b)=>b.ts-a.ts);
+  openSheet({title:'❤️ 健康评分构成',sub:'基线 100 分，近 30 天每条异常记录扣 8 分，下限 60',
+    html:abn.length?`<ul class="tl">${abn.map(l=>`<li onclick="openLogDetail('${l.id}')"><span class="tl-date">${fmt(l.ts)}</span><span class="dot" style="background:var(--warn)"></span><span class="tx">${esc(l.type)}：${esc(l.note)}</span><span class="ar">›</span></li>`).join('')}</ul>`:'<div class="empty">近 30 天没有异常记录 🎉</div>'});
+}
+function drillTodo(){
+  const todo=S.reminders.filter(r=>daysBetween(r.lastTs+r.cycle*86400000,Date.now())<=3);
+  openSheet({title:'📋 今日 / 临期待办',sub:'到期或 3 天内到期的事项，点条目可标记完成',
+    html:todo.length?todo.map(r=>{const d=daysBetween(r.lastTs+r.cycle*86400000,Date.now());
+      return `<div class="rrow" onclick="closeSheet();openReminder('${r.id}')"><span>${r.label}</span><span style="color:var(--warn)">${d<=0?(d===0?'今天':Math.abs(d)+'天前逾期'):d+'天后'} ›</span></div>`}).join(''):'<div class="empty">暂无临期事项 🎉</div>'});
+}
+
+/* ================= 养护中心 ================= */
+const CARE_ALIAS={dewormin:['体内驱虫'],flea:['体外驱虫'],vaccine:['疫苗'],checkup:['体检'],bath:['洗澡'],nail:['剪指甲']};
+function remOf(it){
+  let r=S.reminders.find(x=>x.careId===it.id);
+  if(r)return r;
+  const al=CARE_ALIAS[it.id]||[];
+  return S.reminders.find(x=>!x.careId&&al.some(a=>(x.label||'').includes(a)))||null;
+}
+function careRows(){
+  return CARE_ITEMS.filter(careApplicable).map(it=>{
+    const r=remOf(it),cy=careCycleOf(it);
+    const days=r?daysBetween(r.lastTs+r.cycle*86400000,Date.now()):null;
+    let st='none';
+    if(days!==null)st=days<0?'od':days===0?'tod':days<=3?'soon':'ok';
+    return {it,r,cy,days,st};
+  });
+}
+function stTxt(x){
+  if(x.days===null)return ['未纳入提醒','ok'];
+  if(x.days<0)return ['逾期 '+Math.abs(x.days)+' 天','od'];
+  if(x.days===0)return ['今天','tod'];
+  if(x.days<=3)return [x.days+' 天后','soon'];
+  return [x.days+' 天后','ok'];
+}
+function cyTxt(c){return c===-1?'一次性':c===1?'每天':c===7?'每周':c===14?'每两周':c===30?'每月':c===90?'每季':c===365?'每年':'每 '+c+' 天'}
+function buildCarePanel(){
+  const m=catMonths(),st=curStage(),rows=careRows();
+  const act=rows.filter(x=>x.st==='od'||x.st==='tod'||x.st==='soon').sort((a,b)=>a.days-b.days);
+  const notIn=rows.filter(x=>x.it.auto&&x.days===null);
+  const done=rows.filter(x=>x.st==='ok').length;
+  const once=CARE_ITEMS.filter(it=>it.cy.a===-1&&m>=it.age[0]&&m<=it.age[1]);
+  return `
+  <div class="stage">
+    <div class="sh">🐾 ${esc(S.cat.name)} · ${m<1?Math.round(m*30)+' 日龄':m.toFixed(1)+' 月龄'} · ${st.n}</div>
+    <div class="sk">本阶段关键：${st.k}</div>
+    <ul>${st.li.slice(0,3).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+    <div style="text-align:right;margin-top:6px"><span class="chip" onclick="openStage()">查看本阶段全部 ${st.li.length} 条 ›</span></div>
+  </div>
+  <div class="card"><h2>🔔 养护待办 <span class="tag">${act.length?act.length+' 项需处理':'全部按时'}</span><span class="act" onclick="openCareAll()">全部养护项 ›</span></h2>
+    ${act.length?act.slice(0,6).map(x=>{const [t,c]=stTxt(x);
+      return `<div class="cdue" onclick="openCareItem('${x.it.id}')"><span class="ci2">${x.it.ic}</span><span class="cn"><b>${esc(x.it.t)}</b><i>${cyTxt(x.cy)} · 上次 ${x.r?fmt(x.r.lastTs):'—'}</i></span><span class="bdg ${c}">${t}</span></div>`}).join('')
+      :`<div class="empty" style="padding:14px">当前没有到期的养护项 🎉<br>已按时项 ${done} 个</div>`}
+    ${notIn.length?`<button class="genbtn" onclick="genAllCare()">⚡ 一键生成全套养护提醒（${notIn.length} 项未纳入）</button>
+      <div style="font-size:10px;color:var(--sub);text-align:center;margin-top:5px">按 ${m.toFixed(1)} 月龄自动匹配周期，不用自己想</div>`:''}
+    ${once.length?`<div style="margin-top:11px;padding-top:9px;border-top:1px solid var(--line)"><div style="font-size:10.5px;color:var(--sub);margin-bottom:5px">📌 这个年龄段的一次性大事</div>
+      ${once.map(it=>`<div class="cdue" onclick="openCareItem('${it.id}')"><span class="ci2">${it.ic}</span><span class="cn"><b>${esc(it.t)}</b><i>${esc(it.age2||it.age[0]+'-'+it.age[1]+' 月龄')}</i></span><span class="bdg tod">该安排了</span></div>`).join('')}</div>`:''}
+  </div>
+  <div class="card"><h2>📚 新手指南 <span class="tag">不怕多，怕漏</span></h2>
+    <div class="cgrid">
+      <div class="ccell" onclick="openFirstWeek()"><div class="e">🏠</div><div class="n">到家第一周</div><div class="d">6 步走完适应期</div></div>
+      <div class="ccell" onclick="openMyths()"><div class="e">⚠️</div><div class="n">新手误区</div><div class="d">${CARE_MYTHS.length} 条别踩</div></div>
+      <div class="ccell" onclick="openNorms()"><div class="e">📏</div><div class="n">正常值速查</div><div class="d">体温心率便便</div></div>
+      <div class="ccell" onclick="openRedRules()"><div class="e">🚨</div><div class="n">立即就医信号</div><div class="d">${RED_RULES.length} 条保命</div></div>
+    </div>
+  </div>`;
+}
+function openStage(){
+  const st=curStage();
+  openSheet({title:'🐾 '+st.n,sub:'本阶段关键：'+st.k,
+    html:`<div class="cdet"><p>${st.li.map(x=>'· '+esc(x)).join('\n')}</p></div>`});
+}
+async function genAllCare(){
+  const rows=careRows().filter(x=>x.it.auto);
+  let add=0,bind=0;
+  for(const x of rows){
+    if(x.r){ if(!x.r.careId){x.r.careId=x.it.id;await idbPut('reminders',x.r);bind++} continue }
+    if(x.cy<=0)continue;
+    await idbPut('reminders',{id:uid(),cat_id:S.cat.id,careId:x.it.id,type:'养护',label:x.it.ic+' '+x.it.t,cycle:x.cy,lastTs:Date.now()});
+    add++;
+  }
+  await load();refreshAll();
+  toast(`已生成 ${add} 项养护提醒${bind?`，绑定已有 ${bind} 项`:''}`);
+}
+function openCareItem(id){
+  const it=CARE_ITEMS.find(i=>i.id===id);if(!it)return;
+  const r=remOf(it),cy=careCycleOf(it);
+  const days=r?daysBetween(r.lastTs+r.cycle*86400000,Date.now()):null;
+  const sub=cy===-1?(it.age2||`建议 ${it.age[0]}-${it.age[1]} 月龄`)
+    :`${cyTxt(cy)}${r?` · 上次 ${fmt(r.lastTs)} · ${days<0?'逾期 '+Math.abs(days)+' 天':days===0?'今天到期':days+' 天后'}`:' · 尚未纳入提醒'}`;
+  const acts=[];
+  if(r)acts.push({label:'✅ 今天做了（重置周期）',cls:'sec',fn:async()=>{r.lastTs=Date.now();if(!r.careId)r.careId=it.id;await idbPut('reminders',r);await load();refreshAll();closeSheet();toast(it.t+' 已完成，下次 '+r.cycle+' 天后')}});
+  else if(cy>0)acts.push({label:'➕ 加入我的养护提醒',cls:'sec',fn:async()=>{await idbPut('reminders',{id:uid(),cat_id:S.cat.id,careId:it.id,type:'养护',label:it.ic+' '+it.t,cycle:cy,lastTs:Date.now()});await load();refreshAll();closeSheet();toast('已加入提醒，每 '+cy+' 天一次')}});
+  else acts.push({label:'📝 记一笔（标记已完成）',cls:'sec',fn:async()=>{await idbPut('logs',{id:uid(),cat_id:S.cat.id,ts:Date.now(),type:'里程碑',status:'正常',note:it.t+' 已完成',data:{title:it.t},photos:[]});await load();refreshAll();closeSheet();toast('已记录：'+it.t)}});
+  if(r)acts.push({label:'⚙️ 调整周期 / 删除',fn:()=>{closeSheet();setTimeout(()=>openReminder(r.id),260)}});
+  acts.push({label:'关闭',cls:'gray',fn:closeSheet});
+  openSheet({title:it.ic+' '+it.t,sub,
+    html:`<div class="cdet">
+      <h4>为什么必须做</h4><p>${esc(it.why)}</p>
+      <h4>具体怎么做</h4><p>${esc(it.how)}</p>
+      <h4>新手常踩的坑</h4><div class="errbox">${esc(it.err)}</div>
+      <h4>什么情况要警惕</h4><div class="warnbox">${esc(it.sig)}</div>
+    </div>`,actions:acts});
+}
+function openCareAll(){
+  const rows=careRows(),grps=[...new Set(CARE_ITEMS.map(i=>i.grp))];
+  const m=catMonths();
+  let h='';
+  grps.forEach(g=>{
+    const list=CARE_ITEMS.filter(i=>i.grp===g&&m>=i.age[0]&&m<=i.age[1]);
+    if(!list.length)return;
+    h+=`<div style="font-size:10.5px;color:var(--sub);margin:12px 0 2px;font-weight:600">${g}</div>`;
+    list.forEach(it=>{
+      const x=rows.find(r=>r.it.id===it.id);
+      const cy=careCycleOf(it);
+      const [t,c]=x?stTxt(x):[cy===0?'当前年龄不适用':'一次性','ok'];
+      h+=`<div class="cdue" onclick="closeSheet();setTimeout(()=>openCareItem('${it.id}'),260)"><span class="ci2">${it.ic}</span><span class="cn"><b>${esc(it.t)}</b><i>${cy===-1?esc(it.age2||it.age[0]+'-'+it.age[1]+' 月龄'):cyTxt(cy)} · ${esc(it.why.slice(0,26))}…</i></span><span class="bdg ${c}">${t}</span></div>`;
+    });
+  });
+  openSheet({title:'🌿 全部养护项',sub:`按 ${m.toFixed(1)} 月龄筛选后共 ${CARE_ITEMS.filter(i=>m>=i.age[0]&&m<=i.age[1]).length} 项 · 点任意一项看详细做法`,html:h,
+    actions:[{label:'⚡ 一键生成全套提醒',cls:'sec',fn:async()=>{await genAllCare();closeSheet()}},{label:'关闭',cls:'gray',fn:closeSheet}]});
+}
+function openFirstWeek(){
+  openSheet({title:'🏠 接猫到家第一周',sub:'新手最容易在这一周做错事 · 核心原则：少干预、给空间',
+    html:CARE_FIRSTWEEK.map(([d,c])=>`<div class="myth" style="border-color:var(--line)"><div style="font-size:12px;font-weight:700;color:var(--accent)">${esc(d)}</div><div class="a" style="margin-top:3px">${esc(c)}</div></div>`).join('').replace(/class="a"/g,'class="a" style="margin-top:3px"').replace(/✅ /g,'')});
+}
+function openMyths(){
+  openSheet({title:'⚠️ 新手常见误区',sub:'这 '+CARE_MYTHS.length+' 条几乎每个新手都会踩中一两条',
+    html:CARE_MYTHS.map(([q,a])=>`<div class="myth"><div class="q">${esc(q)}</div><div class="a">${esc(a)}</div></div>`).join('')});
+}
+function openNorms(){
+  openSheet({title:'📏 正常值速查表',sub:'拿不准的时候先对照这张表，超出范围就记一笔',
+    html:`<table class="ntab"><thead><tr><th>项目</th><th>正常范围</th><th>异常提示</th></tr></thead><tbody>
+      ${CARE_NORMS.map(([a,b,c])=>`<tr><td>${esc(a)}</td><td>${esc(b)}</td><td>${esc(c)}</td></tr>`).join('')}
+    </tbody></table>`});
+}
+/* 拍照分析 → 养护推荐 */
+function careAdviceFor(type,o){
+  const A=[],m=catMonths(),j=JSON.stringify(o||{});
+  const has=k=>j.includes(k);
+  if(type==='food'){
+    const g=parseFloat(o.portion_g||o.grams||o.amount||0);
+    if(g>70)A.push('这顿分量偏多。成猫每日总量约 40-60g 干粮（45-55 kcal/kg），建议分 2-3 餐而不是一次给足。');
+    if(g&&g<25&&m<6)A.push('幼猫需要少量多餐，一天 4-5 顿，总量要够——不长秤比吃多更危险。');
+    A.push('换粮必须走 7 天过渡法：2天25% → 2天50% → 2天75% → 全新粮，否则大概率软便。');
+    if(has('干')||has('dry'))A.push('长期纯干粮饮水量往往不足。建议加湿粮或用流动水机，慢性肾病与此高度相关。');
+    if(S.cat&&S.cat.neutered==='已绝育')A.push('已绝育猫代谢约降 20%，同样的饭量很容易发胖，建议按理想体重而非当前体重算热量。');
+    A.push('每周固定时间称一次体重，比盯着饭量更能判断喂得对不对。');
+  }
+  if(type==='stool'){
+    if(has('干')||has('硬')||has('1')||has('2'))A.push('偏干硬提示饮水不足或毛球。措施：增加湿粮比例、多点位放水、每周梳毛 2-3 次、必要时用化毛膏。');
+    if(has('稀')||has('软')||has('6')||has('7'))A.push('偏软稀：先停所有零食和牛奶，观察 48 小时；近期换过粮就退回原粮重新过渡。超过 3 天或带血必须就医。');
+    A.push('理想是 Bristol 3-4 型（成型、表面略湿、能整条铲起）。每天铲砂时顺手看一眼，是成本最低的健康监测。');
+    A.push('体内驱虫幼猫每月 1 次至 6 月龄，之后每 3 个月一次。便便里见白色米粒状节片就是绦虫，要加做粪检。');
+    if(has('血'))A.push('🚨 便中带血须优先排查：肛裂/便秘、寄生虫、肠炎、异物。建议拍照带去医院，别自行用药。');
+  }
+  if(type==='skin'){
+    A.push('先确认驱虫是否按时：体外每月、体内每季。跳蚤和螨虫是皮肤问题最常见的元凶。');
+    A.push('洗澡不要勤——短毛室内猫 2-3 个月一次足够，且必须用猫专用香波、洗后彻底吹干（湿着最容易长猫癣）。');
+    A.push('梳毛每周 2-3 次（长毛每天），既减少毛球也能提早摸到结痂和肿块。');
+    if(has('癣')||has('结痂')||has('脱毛'))A.push('🚨 局部脱毛+圆形结痂高度怀疑猫癣，属人畜共患。建议做真菌灯/镜检，并暂时限制活动范围、勤消毒。');
+    A.push('毛发暗淡、皮屑多可补充 Omega-3，但要先排除过敏和寄生虫，别直接归因于"营养不良"。');
+  }
+  if(type==='behavior'){
+    A.push('每天两次、每次 10-15 分钟逗猫棒互动，结尾一定让它抓到并给一小口零食，形成完整狩猎闭环。');
+    A.push('躲藏、过度舔毛、乱尿多为应激。保留有它气味的旧物、提供高处和藏身点、可用费洛蒙扩香，别强行抱。');
+    A.push('行为突变往往是疼痛的第一信号。老猫跳不上以前爱去的地方，通常是关节炎而不是"变懒"。');
+    if(m<4)A.push('2-9 周龄是社会化黄金期：多摸爪子耳朵嘴巴、让它熟悉猫包和日常噪音，将来剪甲刷牙看病都会轻松很多。');
+  }
+  if(type==='body'){
+    A.push('理想 BCS 是 4-5/9：摸得到肋骨但看不见、俯视有腰线、侧看腹部微收。');
+    A.push('如果偏胖，减重速度不能超过每周体重的 1-2%——猫快速减重会引发致命的肝脂肪变性。');
+    A.push('增加消耗比单纯减饭量更安全：食物益智玩具、分点位藏食、每天两次追逐游戏。');
+    A.push('每周同一时间称重并记录，用成长曲线看趋势，单次数字没意义。');
+  }
+  if(type==='wound'){
+    A.push('🚨 伤口先别自行上药：碘伏可以，酒精/双氧水不行，人用软膏（尤其含激素或利多卡因）绝对禁用。');
+    A.push('戴伊丽莎白圈防舔，猫舌倒刺会把伤口越舔越大。');
+    A.push('任何新出现的硬块、快速变大的包、超过 3 天不愈合的伤口，都建议就医而不是观察。');
+  }
+  if(type==='med'){
+    A.push('人药禁用清单要牢记：对乙酰氨基酚（扑热息痛）对猫致命，布洛芬、阿司匹林同样禁用。');
+    A.push('按体重精确给药，别按包装"一颗"估。喂药后确认真的咽下去了，猫很会藏药再吐出来。');
+    A.push('把用药记进 App，疗程结束前不要因为"看起来好了"擅自停药，抗生素尤其如此。');
+  }
+  if(type==='environment'){
+    A.push('必查三件事：封窗封阳台（隐形防护网）、收好细绳和电线、马桶盖合上。高层坠楼是室内猫头号意外死因。');
+    A.push('有毒植物清单：百合科（花粉即可致急性肾衰，绝对不能有）、绿萝、滴水观音、龟背竹。精油扩香也对猫有害。');
+    A.push('猫砂盆数量 = 猫数 + 1，分散摆放、远离食盆和洗衣机等噪音源。');
+    A.push('提供垂直空间：猫爬架、窗台观景位。室内猫的行为问题多数源于环境单调。');
+  }
+  if(o&&(o.warning||o.need_vet||o.blood))A.unshift('🚨 本次分析命中风险信号，建议优先联系医院，不要仅依赖 AI 结论。');
+  return A;
+}
+function adviceHTML(type,o){
+  const A=careAdviceFor(type,o);if(!A.length)return '';
+  return `<div class="advbox"><div class="at">🌿 针对这张图的养护建议</div><ul>${A.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+}
+
+/* ================= 提醒 CRUD ================= */
+function openReminder(id){
+  const r=S.reminders.find(x=>x.id===id);if(!r)return;
+  const d=daysBetween(r.lastTs+r.cycle*86400000,Date.now());
+  openSheet({title:r.label,sub:`周期 ${r.cycle} 天 · 上次 ${fmt(r.lastTs)} · ${d<=0?'已到期':d+' 天后到期'}`,
+    html:`<div class="field"><label>名称</label><input id="rmLabel" value="${esc(r.label)}"></div>
+          <div class="field"><label>周期（天）</label><input id="rmCycle" type="number" value="${r.cycle}"></div>
+          <div class="field"><label>上次执行日期</label><input id="rmLast" type="date" value="${new Date(r.lastTs).toISOString().slice(0,10)}"></div>`,
+    actions:[
+      {label:'✅ 标记已完成（重置周期）',cls:'sec',fn:async()=>{r.lastTs=Date.now();await idbPut('reminders',r);await load();refreshAll();closeSheet();toast('已完成，下次 '+r.cycle+' 天后')}},
+      {label:'⏭ 顺延 7 天',fn:async()=>{r.lastTs=r.lastTs+7*86400000;await idbPut('reminders',r);await load();refreshAll();closeSheet();toast('已顺延 7 天')}},
+      {label:'💾 保存修改',fn:async()=>{r.label=$('rmLabel').value||r.label;r.cycle=parseInt($('rmCycle').value)||r.cycle;const dv=$('rmLast').value;if(dv)r.lastTs=new Date(dv).getTime();await idbPut('reminders',r);await load();refreshAll();closeSheet();toast('提醒已更新')}},
+      {label:'🗑 删除提醒',cls:'danger',fn:async()=>{if(!confirm('删除该提醒？'))return;await idbDel('reminders',r.id);await load();refreshAll();closeSheet();toast('提醒已删除')}},
+      {label:'取消',cls:'gray',fn:closeSheet}]});
+}
+function openAddReminder(){
+  openSheet({title:'＋ 新增提醒',sub:'到期会在首页与待办中提示',
+    html:`<div class="field"><label>名称</label><input id="nrLabel" placeholder="如 💊 猫癣药膏"></div>
+          <div class="field"><label>周期（天）</label><input id="nrCycle" type="number" value="30"></div>
+          <div class="field"><label>上次执行日期</label><input id="nrLast" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field"><label>快速模板</label><div class="chips single" id="nrTpl">${['💉 年度疫苗|365','🪱 体内驱虫|90','🪟 体外驱虫|30','🩺 年度体检|365','🛁 洗澡|60','✂️ 剪指甲|14'].map(t=>`<span class="chip" onclick="applyTpl('${t}')">${t.split('|')[0]}</span>`).join('')}</div></div>`,
+    actions:[{label:'保存提醒',fn:async()=>{
+      const label=$('nrLabel').value.trim();if(!label){toast('请填写名称');return}
+      await idbPut('reminders',{id:uid(),cat_id:S.cat.id,type:'自定义',label,cycle:parseInt($('nrCycle').value)||30,lastTs:new Date($('nrLast').value||Date.now()).getTime()});
+      await load();refreshAll();closeSheet();toast('提醒已添加')}},{label:'取消',cls:'gray',fn:closeSheet}]});
+}
+function applyTpl(t){const [n,c]=t.split('|');$('nrLabel').value=n;$('nrCycle').value=c}
+
+/* ================= 记一笔 ================= */
+function renderLog(){
+  let h=`<div class="camcard" onclick="openVision()"><div class="ci">📷</div><div><div class="ct">AI 拍照分析</div><div class="cs">食物营养 / 排泄物 / 皮肤 / 行为 / 用药 / 伤口 / 环境 / 体态</div></div><div style="margin-left:auto;font-size:20px;color:var(--accent)">›</div></div>
+  <div class="card" style="background:linear-gradient(135deg,#fff,#fbf3ea);margin-bottom:12px"><div style="font-size:13px;font-weight:700">记一笔 · 全维度开放</div><div style="font-size:11px;color:var(--sub);margin-top:3px">24 项均可录入，每项都有专用字段；带 📷 项支持拍照 AI 分析</div></div>
+  <div class="loggrid">`;
+  CATS.forEach(c=>{h+=`<div class="logitem" onclick="openLog('${c.nm}')"><div class="ic">${c.ic}</div><div class="nm">${c.nm}</div><div class="op">${c.photo?'📷可分析':'可录入'}</div></div>`});
+  $('p-log').innerHTML=h+'</div>';
+}
+let curLog=null,editingId=null;
+function openLog(name,existing){
+  curLog=CATS.find(c=>c.nm===name)||{nm:name,photo:false};
+  editingId=existing?existing.id:null;
+  const data=existing?(existing.data||{}):{};
+  const ts=existing?existing.ts:Date.now();
+  const status=existing?existing.status:'正常';
+  let f=`<div class="field"><label>记录时间</label><input id="logTs" type="datetime-local" value="${toLocalInput(ts)}"></div>
+    <div class="field"><label>状态</label><div class="chips single" id="stChips">${['正常','偏多','偏少','异常'].map(s=>`<span class="chip ${s===status?'on':''}">${s}</span>`).join('')}</div></div>`;
+  f+=renderFields(SCH[curLog.nm]||[{k:'value',t:'text',l:'内容',ph:''}],data);
+  f+=`<div class="field"><label>备注</label><input id="logRemark" placeholder="补充说明…" value="${esc(existing&&existing.remark||'')}"></div>`;
+  if(curLog.photo)f+=`<div class="field"><label>拍照分析（可选）</label><span class="chip" onclick="closeSheet();openVision('${curLog.photo}')">📷 拍照 AI 分析</span></div>`;
+  if(curLog.red)f+=`<div class="field" style="border-color:#f0b9a8;background:#fdf2ee"><label style="color:#b8442c">⚠️ 助手提示</label><div style="font-size:12px;color:#9a4a37">该维度会触发红色预警评估。若出现持续呕吐 / 不食 / 呼吸异常，请立即就医。</div></div>`;
+  const actions=[{label:editingId?'💾 保存修改':'保存记录',fn:saveLog}];
+  if(editingId)actions.push({label:'🗑 删除这条记录',cls:'danger',fn:async()=>{if(!confirm('删除这条记录？'))return;await idbDel('logs',editingId);await load();refreshAll();closeSheet();toast('记录已删除')}});
+  actions.push({label:'取消',cls:'gray',fn:closeSheet});
+  openSheet({title:(editingId?'编辑 · ':'记录 · ')+curLog.nm,sub:`「${curLog.nm}」维度已开放全部字段`,html:f,actions});
+}
+async function saveLog(){
+  if(!S.cat){toast('请先建立猫咪档案');return}
+  const status=document.querySelector('#stChips .chip.on')?.textContent||'正常';
+  const data=collectFields('shFields');
+  delete data.__x;
+  const ts=fromLocalInput($('logTs').value);
+  const remark=$('logRemark').value.trim();
+  const note=buildNote(curLog.nm,data)+(remark?' · '+remark:'');
+  const rec={id:editingId||uid(),cat_id:S.cat.id,ts,type:curLog.nm,status,note,data,remark,photos:[]};
+  await idbPut('logs',rec);
+  await autoReminder(curLog.nm,ts);
+  const redHit=(curLog.red&&status==='异常')||RED_KW.some(k=>note.includes(k))||(data.temp&&(parseFloat(data.temp)>39.5||parseFloat(data.temp)<37.5))||(data.count&&curLog.nm==='呕吐'&&parseInt(data.count)>=3);
+  closeSheet();await load();refreshAll();
+  toast((editingId?'已更新：':'已保存：')+curLog.nm);
+  if(redHit)setTimeout(()=>toast('🚨 红色预警：该情况建议尽快就医，勿自行用药'),1200);
+  editingId=null;
+}
+/* 记录医疗类事件时自动同步提醒锚点 */
+async function autoReminder(type,ts){
+  const map={'疫苗':'疫苗','驱虫':'驱虫'};
+  if(!map[type])return;
+  const r=S.reminders.find(x=>x.type===map[type]);
+  if(r){r.lastTs=ts;await idbPut('reminders',r)}
+}
+
+/* ================= 时间线 ================= */
+function renderTimeline(){
+  const types=['全部',...Array.from(new Set(S.logs.map(l=>l.type)))];
+  let logs=S.logs.slice().sort((a,b)=>b.ts-a.ts);
+  if(tlFilter!=='全部')logs=logs.filter(l=>l.type===tlFilter);
+  if(tlFilter==='⚠️异常')logs=S.logs.filter(l=>l.status==='异常').sort((a,b)=>b.ts-a.ts);
+  const color={体重:'var(--accent)',疫苗:'var(--blue)',就医病历:'var(--warn)',里程碑:'var(--accent2)'};
+  $('p-tl').innerHTML=`
+    <div class="filt">${['全部','⚠️异常',...types.filter(t=>t!=='全部')].map(t=>`<span class="${tlFilter===t?'on':''}" onclick="setFilter('${t}')">${t}</span>`).join('')}</div>
+    <div class="card"><h2>🕒 时间线 <span class="tag">${logs.length} 条</span><span class="act" onclick="go('log')">＋ 记一笔</span></h2>
+    ${logs.length?`<ul class="tl">${logs.slice(0,120).map(l=>`<li onclick="openLogDetail('${l.id}')"><span class="tl-date">${fmt(l.ts)}</span><span class="dot" style="background:${l.status==='异常'?'var(--warn)':(color[l.type]||'var(--sub)')}"></span><span class="tx">${esc(l.type)}：${esc(l.note)}</span><span class="ar">›</span></li>`).join('')}</ul>`:'<div class="empty">该筛选下没有记录</div>'}</div>`;
+}
+function setFilter(t){tlFilter=t;renderTimeline()}
+function openLogDetail(id){
+  const l=S.logs.find(x=>x.id===id);if(!l)return;
+  const sch=SCH[l.type]||[];
+  const rows=sch.filter(f=>l.data&&l.data[f.k]!=null&&l.data[f.k]!=='').map(f=>`<div style="display:flex;font-size:12px;padding:6px 0;border-bottom:1px dashed var(--line)"><span style="color:var(--sub);width:110px;flex:0 0 auto">${f.l}</span><span>${esc(l.data[f.k])}</span></div>`).join('');
+  openSheet({title:l.type,sub:fmtFull(l.ts)+' · 状态：'+l.status,
+    html:(rows||`<div style="font-size:12px;line-height:1.6">${esc(l.note)}</div>`)+(l.remark?`<div style="font-size:12px;color:var(--sub);margin-top:8px">备注：${esc(l.remark)}</div>`:''),
+    actions:[
+      {label:'✏️ 编辑',fn:()=>{closeSheet();setTimeout(()=>openLog(l.type,l),260)}},
+      {label:'🗑 删除',cls:'danger',fn:async()=>{if(!confirm('删除这条记录？'))return;await idbDel('logs',id);await load();refreshAll();closeSheet();toast('记录已删除')}},
+      {label:'关闭',cls:'gray',fn:closeSheet}]});
+}
+
+/* ================= 助手 ================= */
+const CARE_KW={
+ bath:['洗澡','沐浴','多久洗','洗一次'],nail:['指甲','剪甲','爪子','磨爪'],
+ teeth:['刷牙','牙','口臭','牙结石'],ear:['耳朵','耳螨','耳垢','掏耳'],
+ brush:['梳毛','掉毛','毛球','打结'],dewormin:['体内驱虫','驱虫','打虫','虫'],
+ flea:['体外驱虫','跳蚤','蜱','滴剂'],vaccine:['疫苗','三联','狂犬','免疫'],
+ checkup:['体检','血检','生化','年检'],weigh:['称重','体重多久','量体重'],
+ litter:['铲屎','铲砂','猫砂盆多久'],litterfull:['换猫砂','洗砂盆','全换'],
+ feed:['喂多少','喂几顿','食量','喂食量','换粮'],water:['喝水','饮水','水碗'],
+ play:['玩','陪玩','逗猫','丰容','无聊'],neuter:['绝育','结扎','发情'],
+ bodycheck:['肿块','摸','体表','检查身体'],dental:['洗牙','洁牙'],
+ social:['社会化','怕人','胆小','训练'],foodswitch:['成猫粮','换成猫粮','幼猫粮到'],
+ firstvet:['刚到家','新猫','第一次去医院','首检'],observe:['每天观察','日常检查']
+};
+function careAnswer(q){
+  for(const id in CARE_KW){
+    if(!CARE_KW[id].some(k=>q.includes(k)))continue;
+    const it=CARE_ITEMS.find(i=>i.id===id);if(!it)continue;
+    const cy=careCycleOf(it),r=remOf(it),m=catMonths();
+    let head=`${it.ic} ${it.t}｜`;
+    if(cy===-1)head+=`建议时机：${it.age2||it.age[0]+'-'+it.age[1]+' 月龄'}`;
+    else if(cy===0)head+=`${S.cat.name} 当前 ${m.toFixed(1)} 月龄，这一项暂不适用`;
+    else head+=`${cyTxt(cy)}一次（按 ${S.cat.name} ${m.toFixed(1)} 月龄推算）`;
+    if(r){const d=daysBetween(r.lastTs+r.cycle*86400000,Date.now());
+      head+=`\n上次：${fmt(r.lastTs)}，${d<0?'已逾期 '+Math.abs(d)+' 天 ⚠️':d===0?'今天到期':d+' 天后到期'}`}
+    return `${head}\n\n【怎么做】${it.how}\n\n【为什么】${it.why}\n\n【新手常踩的坑】${it.err}\n\n【要警惕】${it.sig}\n\n（来自本地养护引擎，已按你家猫的月龄计算，未调用云端 AI）`;
+  }
+  return null;
+}
+function offlineAnswer(q){
+  const ca=careAnswer(q); if(ca)return ca;
+  for(const k in KB){if(q.includes(k))return KB[k]}
+  const w=S.logs.filter(l=>l.type==='体重').sort((a,b)=>a.ts-b.ts);
+  if(/体重|胖|瘦|长得/.test(q)&&w.length>1)return `${S.cat.name} 最近一次体重 ${wVal(w[w.length-1])}kg，较上次 ${(wVal(w[w.length-1])-wVal(w[w.length-2])).toFixed(2)}kg。（本条来自本地记录计算，未调用 AI）`;
+  if(/上次|最近/.test(q)){const l=S.logs.slice().sort((a,b)=>b.ts-a.ts)[0];if(l)return `最近一条记录：${fmt(l.ts)} ${l.type} — ${l.note}`}
+  return '我当前处于离线知识库模式（未配置 AI 代理），但养护类问题我都能答。\n\n可以直接问：多久洗一次澡 / 多久驱虫 / 多久剪指甲 / 疫苗怎么打 / 要不要刷牙 / 耳朵怎么清 / 一天喂几顿 / 什么时候绝育 / 多久体检 / 猫砂多久换。\n\n也可以问急症：呕吐、尿闭、软便、百合中毒。\n配置 AI 代理后，我会结合 '+(S.cat?S.cat.name:'猫咪')+' 的实际记录来回答。';
+}
+function renderAI(){
+  $('p-ai').innerHTML=`
+    <div class="banner" onclick="openRedRules()"><div class="bt">🚨 红色预警规则已开启<span>查看全部 9 条 ›</span></div><div class="bd">持续呕吐 / 尿闭 / 呼吸困难 / 抽搐 / 不食>24h / 牙龈苍白 → 本地规则直接提示就医，不依赖 AI。</div></div>
+    <div class="card"><h2>🌿 养护速查 <span class="tag">按 ${S.cat?catMonths().toFixed(1):'—'} 月龄</span><span class="act" onclick="openCareAll()">全部 ${CARE_ITEMS.length} 项 ›</span></h2>
+      <div style="font-size:11.5px;color:var(--sub);line-height:1.6;margin-bottom:8px">多久洗一次澡、多久驱虫、多久剪指甲——每一项都算好周期，点开有做法、常见坑和警惕信号。</div>
+      <div class="cgrid">
+        <div class="ccell" onclick="openCareItem('bath')"><div class="e">🛁</div><div class="n">洗澡</div><div class="d">${cyTxt(careCycleOf(CARE_ITEMS.find(i=>i.id==='bath')))}</div></div>
+        <div class="ccell" onclick="openCareItem('dewormin')"><div class="e">🪱</div><div class="n">体内驱虫</div><div class="d">${cyTxt(careCycleOf(CARE_ITEMS.find(i=>i.id==='dewormin')))}</div></div>
+        <div class="ccell" onclick="openCareItem('flea')"><div class="e">🪟</div><div class="n">体外驱虫</div><div class="d">${cyTxt(careCycleOf(CARE_ITEMS.find(i=>i.id==='flea')))}</div></div>
+        <div class="ccell" onclick="openCareItem('nail')"><div class="e">✂️</div><div class="n">剪指甲</div><div class="d">${cyTxt(careCycleOf(CARE_ITEMS.find(i=>i.id==='nail')))}</div></div>
+        <div class="ccell" onclick="openCareItem('teeth')"><div class="e">🦷</div><div class="n">刷牙</div><div class="d">${cyTxt(careCycleOf(CARE_ITEMS.find(i=>i.id==='teeth')))}</div></div>
+        <div class="ccell" onclick="openCareItem('ear')"><div class="e">👂</div><div class="n">清耳朵</div><div class="d">${cyTxt(careCycleOf(CARE_ITEMS.find(i=>i.id==='ear')))}</div></div>
+      </div></div>
+    <div class="guide" onclick="openKB()"><div class="gt">🐾 新手养猫知识库<span>8 篇 ›</span></div><ul>
+      <li>封窗封阳台、收好线绳与小物件</li><li>禁忌：巧克力 / 洋葱 / 葡萄 / 木糖醇 / <b>百合剧毒</b></li>
+      <li>异常信号：软便>2天、呕吐、喷嚏流涕、尿团变小</li></ul></div>
+    <div class="card"><h2>📷 AI 视觉分析 <span class="tag">8 类场景</span><span class="act" onclick="openIngest()">素材盒 ›</span></h2>
+      <div style="font-size:11.5px;color:var(--sub);line-height:1.6;margin-bottom:9px">拍照上传，或由本地抓取服务自动收取摄像头导出的照片/视频（可抽帧）。</div>
+      <div class="quick">${VISION_TYPES.map(([k,n])=>`<span onclick="openVision('${k}')">${n}</span>`).join('')}</div></div>
+    <div class="card"><h2>🤖 专业助手 <span class="tag">${S.settings.workerUrl?'DeepSeek 在线':'离线知识库'}</span><span class="act" onclick="clearChat()">清空对话</span></h2>
+      <div id="chatBox">${S.chats.map(c=>`<div class="bubble ${c.role==='me'?'me':'ai'}">${esc(c.text)}</div>`).join('')||'<div class="empty">问我任何养猫问题</div>'}</div>
+      <div class="quick">${['多久洗一次澡','多久驱虫一次','多久剪指甲','要不要刷牙','耳朵怎么清','一天喂几顿','什么时候绝育','多久体检一次','疫苗怎么打','猫砂多久换','最近体重怎么样','软便怎么办'].map(q=>`<span onclick="sendQ('${q}')">${q}</span>`).join('')}</div>
+      <div class="chatbar"><input id="chatIn" placeholder="问点什么…（回车发送）"><button onclick="onSend()">发送</button></div></div>`;
+  const inp=$('chatIn');if(inp)inp.onkeydown=e=>{if(e.key==='Enter')onSend()};
+  scrollChat();
+}
+function scrollChat(){const b=$('chatBox');if(b)b.scrollTop=b.scrollHeight;const p=$('p-ai');if(p)p.scrollTop=p.scrollHeight}
+function onSend(){const i=$('chatIn');const q=i.value.trim();if(!q){toast('先输入问题');return}i.value='';sendQ(q)}
+async function pushChat(role,text){
+  const c={id:uid(),cat_id:S.cat?S.cat.id:'c1',ts:Date.now(),role,text};
+  await idbPut('chats',c);S.chats.push(c);
+  const b=$('chatBox');if(b){if(b.querySelector('.empty'))b.innerHTML='';const d=document.createElement('div');d.className='bubble '+(role==='me'?'me':'ai');d.textContent=text;b.appendChild(d);scrollChat()}
+  return c;
+}
+async function sendQ(q){
+  await pushChat('me',q);
+  if(!S.settings.workerUrl){await pushChat('ai',offlineAnswer(q));return}
+  const ph=await pushChat('ai','分析中…');
+  let ctx=S.logs.slice().sort((a,b)=>b.ts-a.ts).slice(0,30).map(l=>`${fmt(l.ts)} ${l.type}:${l.note}`).join('\n');
+  const st=curStage(),ca=careAnswer(q);
+  ctx=`【猫咪档案】${S.cat.name} · ${catMonths().toFixed(1)} 月龄 · ${st.n} · ${S.cat.neutered||'绝育情况未知'} · ${S.cat.breed||''}\n`
+    +`【本阶段要点】${st.li.join('；')}\n`
+    +(ca?`【本地养护引擎给出的标准答案，请以此为准并展开】\n${ca}\n`:'')
+    +`【最近记录】\n${ctx}`;
+  let ans;
+  try{
+    const r=await fetch(S.settings.workerUrl+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,context:S.settings.assistantOn?ctx:''})});
+    const j=await r.json();ans=j.content||offlineAnswer(q);
+  }catch(e){ans=offlineAnswer(q)+'\n（AI 调用失败，已回退离线知识库）'}
+  ph.text=ans;await idbPut('chats',ph);
+  const b=$('chatBox');if(b&&b.lastChild)b.lastChild.textContent=ans;scrollChat();
+}
+async function clearChat(){if(!confirm('清空当前猫咪的对话记录？'))return;for(const c of S.chats)await idbDel('chats',c.id);await load();renderAI();toast('对话已清空')}
+function openRedRules(){
+  openSheet({title:'🚨 红色预警规则（9 条）',sub:'本地规则，不依赖 AI。命中任意一条请立即联系宠物医院',
+    html:RED_RULES.map(([t,d])=>`<div class="field" style="border-color:#f0b9a8;background:#fdf2ee"><label style="color:#b8442c">${t}</label><div style="font-size:12px;color:#9a4a37;line-height:1.6">${d}</div></div>`).join('')});
+}
+function openKB(){
+  openSheet({title:'📚 新手养猫知识库',sub:'点标题展开全文 · 离线可用',
+    html:KB_ARTICLES.map((a,i)=>`<div class="kbitem" onclick="toggleKB(${i})">${a.t}<span id="kbar${i}">›</span></div><div class="kbbody hidden" id="kb${i}">${esc(a.c)}</div>`).join('')});
+}
+function toggleKB(i){const b=$('kb'+i);b.classList.toggle('hidden');$('kbar'+i).textContent=b.classList.contains('hidden')?'›':'⌄'}
+
+/* ================= 拍照分析 ================= */
+let curVisionType='food',curVisionResult=null,curVQ='';
+let curIngest=null;            // 当前分析素材来自素材盒时的元信息 {id,name,kind,frameCount,frame}
+let ingestPending=null;        // 待处理素材数量，null=未探测/服务未开
+function openVision(preset){
+  if(!S.cat){toast('请先建立猫咪档案');return}
+  curVisionType=preset||'food';curVQ='';curVisionResult=null;curIngest=null;
+  $('vrow').innerHTML=VISION_TYPES.map(([k,n])=>`<span class="chip ${k===curVisionType?'on':''}" data-vk="${k}" onclick="pickV('${k}')">${n}</span>`).join('');
+  $('calibField').classList.toggle('hidden',curVisionType!=='food');
+  $('calibInput').value=S.settings.refBowlCm||'';
+  $('vprev').style.display='none';$('vres').classList.add('hidden');$('vEdit').classList.add('hidden');
+  $('vQ').classList.add('hidden');$('vSave').classList.add('hidden');$('vfile').value='';
+  $('frameBar').classList.add('hidden');$('frameBar').innerHTML='';
+  $('fileLabel').textContent='📷 拍照 / 从相册选择';
+  renderSrcBar();probeIngest();
+  $('mask').classList.add('show');$('visionModal').classList.add('show');
+}
+function closeVision(){$('mask').classList.remove('show');$('visionModal').classList.remove('show')}
+function setCalib(v){const el=document.getElementById('calibInput');if(el){el.value=v;el.focus();}}
+function pickV(k){
+  curVisionType=k;curVQ='';
+  $('vrow').querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.vk===k));
+  $('calibField').classList.toggle('hidden',k!=='food');
+}
+/* --- 来源栏：原「拍照/相册」入口不变，这里只追加「素材盒」通道 --- */
+function renderSrcBar(){
+  const bar=$('srcBar');if(!bar)return;
+  if(curIngest){
+    bar.innerHTML=`<b class="hot" onclick="openIngest()">📥 素材盒：${esc(curIngest.name)}　换一个 ›</b>`;
+  }else{
+    const badge=ingestPending>0?`<i>${ingestPending}</i>`:'';
+    const tip=ingestPending===null?'（服务未启动）':'';
+    bar.innerHTML=`<b class="${ingestPending>0?'hot':''}" onclick="openIngest()">📥 从素材盒选取${badge}${tip}</b>`;
+  }
+}
+/* --- 公共分析链路：拍照上传 与 素材盒 共用同一条（校准/置信度/复核/对账全部继承） --- */
+async function runVisionAnalyze(data){
+  $('vprev').src=data;$('vprev').style.display='block';
+  $('vres').classList.remove('hidden');$('vres').textContent='分析中…';
+  $('vEdit').classList.add('hidden');$('vQ').classList.add('hidden');$('vSave').classList.add('hidden');
+  try{
+    let res;
+    if(S.settings.workerUrl){
+      let calib='';
+      if(curVisionType==='food'){const v=$('calibInput').value.trim();if(v)calib=/^[\d.]+$/.test(v)?`喂食碗内径约 ${v} cm，请据此把像素估算换算为真实克数`:`参考物：${v}`}
+      const r=await fetch(S.settings.workerUrl+'/vision',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:curVisionType,image:data,calib})});
+      const j=await r.json();res=j.result||j;
+    }else res=demoVision(curVisionType);
+    showVision(res);
+  }catch(err){
+    $('vres').textContent='AI 调用失败：'+(err.message||err)+'\n已回退演示数据供你查看流程。';
+    showVision(demoVision(curVisionType));
+  }
+}
+$('vfile').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  curIngest=null;renderSrcBar();
+  $('frameBar').classList.add('hidden');
+  $('fileLabel').textContent='🔄 重新拍照 / 换一张';
+  await runVisionAnalyze(await fileToDataURL(f));
+};
+
+/* ================= 素材盒（本地抓取通道） ================= */
+function ingestBase(){return (S.settings.ingestUrl||'').replace(/\/$/,'')||location.origin}
+async function probeIngest(){
+  try{
+    const r=await fetch(ingestBase()+'/ingest/health',{cache:'no-store'});
+    const j=await r.json();
+    ingestPending=j.ok?j.pending:null;
+  }catch{ingestPending=null}
+  renderSrcBar();
+  const dot=$('ingBadge');if(dot)dot.textContent=ingestPending>0?`${ingestPending} 个待处理`:(ingestPending===0?'已清空':'服务未启动');
+  return ingestPending;
+}
+async function openIngest(){
+  $('ingestModal').classList.add('show');$('mask').classList.add('show');
+  await refreshIngest();
+}
+function closeIngest(){$('ingestModal').classList.remove('show');if(!$('visionModal').classList.contains('show'))$('mask').classList.remove('show')}
+async function refreshIngest(){
+  const box=$('ingestList');box.innerHTML='<div class="empty">扫描中…</div>';
+  let j;
+  try{
+    const r=await fetch(ingestBase()+'/ingest/list',{cache:'no-store'});
+    j=await r.json();
+  }catch(e){
+    box.innerHTML=`<div class="empty">未连上本地抓取服务<br><span style="font-size:11px">在电脑上执行：<b>node ingest-server.mjs</b><br>然后用 <b>http://localhost:7788</b> 打开本 App<br>或在「我的 → 抓取服务地址」里填写</span></div>`;
+    $('ingestSub').textContent='服务未启动';ingestPending=null;renderSrcBar();return;
+  }
+  ingestPending=j.pending;renderSrcBar();
+  $('ingestSub').innerHTML=`投放目录：<b>${esc(j.dir||'')}/inbox</b> · 待处理 ${j.pending} 个`;
+  if(!j.items||!j.items.length){
+    box.innerHTML='<div class="empty">投放目录是空的<br><span style="font-size:11px">把摄像头导出的照片/视频拷进 inbox 目录即可</span></div>';return;
+  }
+  const nameOf=k=>({food:'食物营养',stool:'排泄物',skin:'皮肤毛发',behavior:'行为状态',med:'用药识别',wound:'伤口肿块',environment:'环境隐患',body:'体态评分'}[k]||k);
+  box.innerHTML=j.items.map(it=>`<div class="ing" id="ing-${it.id}">
+      <div class="ph" id="th-${it.id}">${it.kind==='video'?'🎬':'🖼'}</div>
+      <div class="nm">${esc(it.name)}<div class="mt">${it.kind==='video'?'视频':'图片'} · ${it.sizeText} · ${new Date(it.mtime).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})} · 推测「${nameOf(it.guess)}」</div></div>
+      <span class="sk" onclick="event.stopPropagation();skipIngest('${it.id}')">忽略</span>
+    </div>`).join('');
+  j.items.forEach(it=>{
+    const row=$('ing-'+it.id);if(row)row.onclick=()=>pickIngest(it);
+    fetch(ingestBase()+'/ingest/thumb?id='+encodeURIComponent(it.id)).then(r=>r.json()).then(t=>{
+      const ph=$('th-'+it.id);
+      if(ph&&t.image)ph.outerHTML=`<img id="th-${it.id}" src="${t.image}" />`;
+    }).catch(()=>{});
+  });
+}
+async function pickIngest(it){
+  if(!S.cat){toast('请先建立猫咪档案');return}
+  closeIngest();
+  if(!$('visionModal').classList.contains('show')){
+    openVision(it.guess);
+    await new Promise(r=>setTimeout(r,60));
+  }
+  pickV(it.guess);
+  $('vrow').querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.vk===it.guess));
+  curIngest={id:it.id,name:it.name,kind:it.kind,frame:0,frameCount:1};
+  renderSrcBar();
+  $('fileLabel').textContent='📷 或改用拍照 / 相册';
+  await loadIngestFrame(0);
+}
+async function loadIngestFrame(idx){
+  if(!curIngest)return;
+  $('vres').classList.remove('hidden');$('vres').textContent='读取素材中…';
+  try{
+    const r=await fetch(`${ingestBase()}/ingest/payload?id=${encodeURIComponent(curIngest.id)}&frame=${idx}`);
+    const j=await r.json();
+    if(j.error){$('vres').textContent='读取失败：'+j.error;return}
+    curIngest.frame=idx;curIngest.frameCount=j.frameCount||1;
+    if(curIngest.frameCount>1){
+      $('frameBar').innerHTML=Array.from({length:curIngest.frameCount},(_,i)=>`<span class="${i===idx?'on':''}" onclick="loadIngestFrame(${i})">帧 ${i+1}</span>`).join('');
+      $('frameBar').classList.remove('hidden');
+    }else $('frameBar').classList.add('hidden');
+    await runVisionAnalyze(j.image);
+  }catch(e){$('vres').textContent='读取失败：'+(e.message||e)}
+}
+async function skipIngest(id){
+  try{
+    await fetch(ingestBase()+'/ingest/skip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
+    toast('已忽略并归档');await refreshIngest();
+  }catch(e){toast('操作失败：'+(e.message||e))}
+}
+function showVision(res){
+  curVisionResult=res;
+  const conf=res&&res.confidence!=null?res.confidence:null;
+  const rows=Object.keys(res||{}).filter(k=>k!=='confidence').map(k=>`<div style="display:flex;padding:4px 0"><span style="color:var(--sub);width:110px;flex:0 0 auto">${esc(k)}</span><span style="flex:1">${esc(typeof res[k]==='boolean'?(res[k]?'是':'否'):res[k])}</span></div>`).join('');
+  $('vres').innerHTML=`<div style="font-weight:700;margin-bottom:6px">分析结果</div>${rows}`+
+    (conf!=null?`<span class="conf ${conf>=0.6?'hi':'lo'}">置信度 ${conf}${conf<0.6?' · 仅供参考':''}</span>`:'')+
+    `<div style="font-size:11px;color:var(--sub);margin-top:7px;line-height:1.5">⚠️ 视觉估算非测量值，医疗结论仅为筛查，不能替代兽医诊断。</div>`+
+    adviceHTML(curVisionType,res||{});
+  $('vres').classList.remove('hidden');
+  $('vEdit').value=JSON.stringify(res,null,2);$('vEdit').classList.remove('hidden');
+  const vq=VQ[curVisionType];
+  if(vq){$('vQ').innerHTML=`<div class="q">${vq.q}（复核纠偏）</div><div class="chips single">${vq.opts.map(o=>`<span class="chip" onclick="pickVQ('${o}')">${o}</span>`).join('')}</div>`;$('vQ').classList.remove('hidden')}
+  else $('vQ').classList.add('hidden');
+  $('vSave').classList.remove('hidden');
+  if(res&&(res.warning||res.need_vet||res.blood))setTimeout(()=>toast('🚨 分析提示异常信号，建议尽快就医'),400);
+}
+function pickVQ(o){curVQ=o}
+function demoVision(t){const m={
+  food:{portion_g:45,kcal:180,protein_pct:38,fat_pct:22,carb_pct:40,balanced:false,advice:'蛋白偏低、碳水偏高，建议提高肉类占比。',confidence:0.7},
+  stool:{bristol:4,color:'棕色',blood:false,parasite:false,verdict:'正常',warning:false,advice:'形态正常，保持当前饮食。',confidence:0.8},
+  skin:{findings:'局部轻微脱毛',suspicion:'疑似轻微皮炎',advice:'观察是否扩散，必要时就医。',need_vet:false,confidence:0.55},
+  behavior:{state:'玩耍',mood:'兴奋',interpret:'精力旺盛，属正常表现。',confidence:0.85},
+  med:{name:'阿莫西林克拉维酸钾',dose:'遵医嘱',use:'广谱抗生素',caution:'按体重给药，不可随意停药。',confidence:0.75},
+  wound:{location:'后腿外侧',size:'约 1cm',suspicion:'浅表擦伤',need_vet:false,advice:'清洁消毒，防舔舐，观察 48 小时。',confidence:0.65},
+  environment:{hazards:'窗边有垂落线绳',advice:'收好线绳防误食造成线性异物。',confidence:0.8},
+  body:{bsc:6,ideal_weight_kg:'3.5-4.2',advice:'略偏胖，建议控制零食。',confidence:0.7}};
+  return m[t]||{note:'演示分析结果',confidence:0.5}}
+function fileToDataURL(file){return new Promise(res=>{const fr=new FileReader();fr.onload=()=>{const img=new Image();img.onload=()=>{const max=800;let w=img.width,h=img.height;if(w>h&&w>max){h=h*max/w;w=max}else if(h>=w&&h>max){w=w*max/h;h=max}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',0.7))};img.onerror=()=>res(fr.result);img.src=fr.result};fr.readAsDataURL(file)})}
+function reconcile(type,res){
+  if(type==='food'&&res&&res.portion_g){
+    const nums=S.logs.filter(l=>l.type==='喂食'&&l.data&&l.data.value).map(l=>parseFloat(l.data.value)).filter(n=>!isNaN(n));
+    if(nums.length){const avg=nums.reduce((a,b)=>a+b,0)/nums.length;
+      if(res.portion_g>avg*3||res.portion_g<avg*0.3)return `估值 ${res.portion_g}g 与历史均值 ${avg.toFixed(0)}g 差异较大，请复核`}
+  }
+  if(type==='body'&&res&&res.ideal_weight_kg){
+    const w=S.logs.filter(l=>l.type==='体重').sort((a,b)=>b.ts-a.ts)[0];
+    if(w){const cur=wVal(w),rg=String(res.ideal_weight_kg).match(/[\d.]+/g);
+      if(rg&&rg.length===2&&(cur<parseFloat(rg[0])*0.8||cur>parseFloat(rg[1])*1.2))return `实测 ${cur}kg 与视觉理想区间 ${res.ideal_weight_kg}kg 偏离较大，请复核`}
+  }
+  return null;
+}
+$('vSave').onclick=async()=>{
+  let obj=curVisionResult;
+  try{obj=JSON.parse($('vEdit').value)}catch{}
+  const map={food:'喂食',stool:'排泄',skin:'梳毛美容',behavior:'精神情绪',med:'用药',wound:'症状不适',environment:'环境变化',body:'体重'};
+  const type=map[curVisionType]||'照片';
+  const data={};
+  if(type==='喂食'&&obj.portion_g)data.value=obj.portion_g;
+  if(type==='体重'&&obj.bsc)data.value=(S.logs.filter(l=>l.type==='体重').sort((a,b)=>b.ts-a.ts)[0]||{data:{}}).data.value||'';
+  const brief=Object.keys(obj).filter(k=>k!=='confidence').map(k=>`${k}:${typeof obj[k]==='boolean'?(obj[k]?'是':'否'):obj[k]}`).join(' · ');
+  const src=curIngest?`📥${curIngest.name}${curIngest.frameCount>1?`(帧${curIngest.frame+1})`:''} · `:'';
+  const note='📷AI · '+src+brief+(curVQ?` | 复核:${curVQ}`:'')+(obj.confidence!=null?` | 置信度${obj.confidence}`:'');
+  const abnormal=!!(obj.warning||obj.need_vet||obj.blood);
+  await idbPut('logs',{id:uid(),cat_id:S.cat.id,ts:Date.now(),type,status:abnormal?'异常':'正常',note,data,remark:curIngest?'AI 分析 · 本地素材抓取':'AI 拍照分析',photos:[]});
+  // 素材盒来源：回执给本地服务，把原文件归档到 processed/ 并留痕，避免重复处理
+  if(curIngest){
+    const ing=curIngest;
+    fetch(ingestBase()+'/ingest/ack',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:ing.id,result:obj,recordType:type,note:curVQ?('复核:'+curVQ):''})})
+      .then(()=>probeIngest()).catch(()=>toast('记录已存，但素材归档失败（服务可能已关闭）'));
+    curIngest=null;
+  }
+  const warn=reconcile(curVisionType,obj);
+  closeVision();await load();refreshAll();
+  toast(warn?'⚠️ '+warn:'分析已存为「'+type+'」记录');
+};
+
+/* ================= 我的 ================= */
+function renderMe(){
+  $('p-me').innerHTML=`
+    <div class="card"><div class="prof" onclick="openCatEdit()"><div class="ava">🐈</div><div><div style="font-size:15px;font-weight:700">${S.cat?esc(S.cat.name):'未建档案'}</div><div style="font-size:11px;color:var(--sub)">${S.cat?esc([S.cat.breed,S.cat.sex,S.cat.birth,(S.cat.weight||'')+'kg',S.cat.neutered||''].filter(Boolean).join(' · ')):'点此建立档案'}</div></div><div class="ar">›</div></div>
+      ${S.cat?`<div style="font-size:11px;color:var(--sub);margin-top:9px">月龄 ${monthAge(S.cat.birth)} · 记录 ${S.logs.length} 条 · 提醒 ${S.reminders.length} 条</div>`:''}</div>
+    <div class="card"><div class="setrow"><label>🤖 AI 代理 URL（国内云函数 / Worker）</label><input id="wUrl" placeholder="https://your-proxy.example.com" value="${esc(S.settings.workerUrl||'')}"></div>
+      <div class="setrow"><label>🧠 助手记忆（开启后会把记录摘要发给 AI）</label><div class="chips single" id="aOn"><span class="chip ${S.settings.assistantOn?'on':''}">开启</span><span class="chip ${!S.settings.assistantOn?'on':''}">关闭</span></div></div>
+      <div class="setrow"><label>🍚 喂食碗内径 cm（食物分析校准基准）</label><input id="bowl" type="number" placeholder="12" value="${S.settings.refBowlCm||''}"></div>
+      <div class="setrow"><label>📥 本地素材抓取服务（留空=与本页同源）</label><input id="ingUrl" placeholder="http://192.168.1.x:7788" value="${esc(S.settings.ingestUrl||'')}"></div>
+      <button class="save" onclick="saveSettings()">保存设置</button>
+      <button class="save gray" onclick="testProxy()">测试 AI 代理连通性</button>
+      <button class="save gray" onclick="testIngest()">测试素材抓取服务</button></div>
+    <div class="card" style="border:1.5px solid var(--warn,#e8915b);background:rgba(232,145,91,.06)">
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px">💾 数据备份（强烈建议）</div>
+      <div style="font-size:11.5px;color:var(--sub);line-height:1.6;margin-bottom:9px">所有数据只存在<b>本机浏览器</b>，换设备 / 清缓存会丢失。定期导出 JSON，换手机或重装时可一键恢复。</div>
+      <div style="display:flex;gap:8px">
+        <button class="save" style="flex:1" onclick="exportJSON()">📤 立即导出备份</button>
+        <button class="save gray" style="flex:1" onclick="importJSON()">📥 导入恢复</button>
+      </div>
+      <div style="font-size:11px;color:var(--sub);margin-top:7px" id="bkTip">${S.settings.lastBackup?('✅ 上次备份：'+S.settings.lastBackup):'⚠️ 还没备份过，建议现在导出一次'}</div>
+    </div>
+    <div class="card"><ul class="menu">
+      <li onclick="openIngest()"><span>📥 素材盒 · 本地抓取</span><span class="ar" id="ingBadge">检测中…</span></li>
+      <li onclick="openCatSwitch()"><span>🐈 切换 / 管理猫咪（${S.cats.length} 只）</span><span class="ar">›</span></li>
+      <li onclick="openAddCat()"><span>➕ 添加一只猫</span><span class="ar">›</span></li>
+      <li onclick="openKB()"><span>📚 新手养猫知识库</span><span class="ar">›</span></li>
+      <li onclick="openRedRules()"><span>🚨 红色预警规则</span><span class="ar">›</span></li>
+      <li onclick="openStats()"><span>📊 数据统计（花费 / 记录分布）</span><span class="ar">›</span></li>
+      <li onclick="exportJSON()"><span>📤 导出全部数据 (JSON)</span><span class="ar">›</span></li>
+      <li onclick="importJSON()"><span>📥 导入备份 (JSON)</span><span class="ar">›</span></li>
+      <li onclick="openPrivacy()"><span>🔒 数据与隐私说明</span><span class="ar">›</span></li>
+      <li onclick="resetAll()"><span style="color:var(--warn)">🗑️ 清空本地数据</span><span class="ar">›</span></li>
+    </ul></div>
+    <div style="text-align:center;font-size:11px;color:var(--sub);padding-bottom:10px">喵迹 MVP · 本地优先 · 数据只存在本机浏览器</div>`;
+  probeIngest();
+}
+function monthAge(birth){if(!birth)return '—';const b=new Date(birth),n=new Date();return Math.max(0,(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth())+' 个月'}
+async function saveSettings(){
+  S.settings.workerUrl=$('wUrl').value.trim();
+  S.settings.assistantOn=(document.querySelector('#aOn .chip.on')?.textContent||'开启')==='开启';
+  S.settings.refBowlCm=parseFloat($('bowl').value)||12;
+  S.settings.ingestUrl=($('ingUrl')?$('ingUrl').value.trim():S.settings.ingestUrl)||'';
+  await idbPut('settings',{...S.settings,id:'cfg'});
+  await load();renderMe();renderAI();probeIngest();toast('设置已保存');
+}
+async function testIngest(){
+  toast('正在检测本地抓取服务…');
+  try{
+    const base=($('ingUrl').value.trim()||location.origin).replace(/\/$/,'');
+    const r=await fetch(base+'/ingest/health',{cache:'no-store'});
+    const j=await r.json();
+    if(!j.ok)throw new Error('返回异常');
+    toast(`✅ 已连通 · 待处理 ${j.pending} 个 · 目录 ${j.inbox}`+(j.ffmpeg?'':' · 未装ffmpeg(视频仅首帧)'));
+  }catch(e){toast('❌ 未连上：请在电脑执行 node ingest-server.mjs')}
+}
+async function testProxy(){
+  const u=$('wUrl').value.trim();
+  if(!u){toast('未填代理 URL — 当前为离线知识库模式，功能可用但非真实 AI');return}
+  toast('正在测试…');
+  try{const r=await fetch(u+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:'ping',context:''})});
+    const j=await r.json();toast(j.content?'✅ 代理连通，AI 已可用':'⚠️ 有响应但格式异常：'+JSON.stringify(j).slice(0,60))}
+  catch(e){toast('❌ 连接失败：'+(e.message||e))}
+}
+function openCatSwitch(){
+  openSheet({title:'🐈 我的猫咪',sub:'点击切换当前猫咪；每只猫的记录、提醒、对话独立',
+    html:S.cats.length?S.cats.map(c=>`<div class="rrow" onclick="switchCat('${c.id}')"><span>${c.id===S.settings.catId?'✅ ':'　'}${esc(c.name)}<br><span style="font-size:10px;color:var(--sub)">${esc([c.breed,c.sex,c.birth].filter(Boolean).join(' · '))}</span></span><span class="ar">切换 ›</span></div>`).join(''):'<div class="empty">还没有猫咪档案</div>',
+    actions:[{label:'➕ 添加一只猫',fn:()=>{closeSheet();setTimeout(openAddCat,260)}},{label:'关闭',cls:'gray',fn:closeSheet}]});
+}
+async function switchCat(id){S.settings.catId=id;await idbPut('settings',{...S.settings,id:'cfg'});await load();refreshAll();renderAI();closeSheet();toast('已切换到 '+S.cat.name)}
+function catForm(c){c=c||{};
+  return `<div class="field"><label>名字</label><input id="cfName" value="${esc(c.name||'')}" placeholder="如 咪咪"></div>
+  <div class="field"><label>品种</label><input id="cfBreed" value="${esc(c.breed||'')}" placeholder="如 英短 / 中华田园猫"></div>
+  <div class="field"><label>性别</label><div class="chips single" id="cfSex"><span class="chip ${c.sex==='公'?'on':''}">公</span><span class="chip ${c.sex==='母'?'on':''}">母</span></div></div>
+  <div class="field"><label>生日</label><input id="cfBirth" type="date" value="${c.birth||''}"></div>
+  <div class="field"><label>当前体重 (kg)</label><input id="cfW" type="number" step="0.01" value="${c.weight||''}" placeholder="3.90"></div>
+  <div class="field"><label>绝育状态</label><div class="chips single" id="cfNeu"><span class="chip ${c.neutered==='未绝育'?'on':''}">未绝育</span><span class="chip ${c.neutered==='已绝育'?'on':''}">已绝育</span></div></div>`;
+}
+function readCatForm(){
+  return {name:$('cfName').value.trim(),breed:$('cfBreed').value.trim(),
+    sex:document.querySelector('#cfSex .chip.on')?.textContent||'',
+    birth:$('cfBirth').value,weight:parseFloat($('cfW').value)||'',
+    neutered:document.querySelector('#cfNeu .chip.on')?.textContent||''};
+}
+function openCatEdit(){
+  if(!S.cat)return openAddCat();
+  openSheet({title:'编辑档案 · '+S.cat.name,sub:'档案信息会用于喂食量、疫苗时间等个性化建议',html:catForm(S.cat),
+    actions:[{label:'💾 保存',fn:async()=>{const d=readCatForm();if(!d.name){toast('请填写名字');return}
+      await idbPut('cats',{...S.cat,...d});await load();refreshAll();closeSheet();toast('档案已更新')}},
+      {label:'🗑 删除这只猫及其全部记录',cls:'danger',fn:async()=>{
+        if(!confirm('将删除 '+S.cat.name+' 的档案、记录、提醒与对话，确认？'))return;
+        const id=S.cat.id;
+        for(const l of S.logs)await idbDel('logs',l.id);
+        for(const r of S.reminders)await idbDel('reminders',r.id);
+        for(const c of S.chats)await idbDel('chats',c.id);
+        await idbDel('cats',id);
+        const rest=(await idbAll('cats'))[0];
+        S.settings.catId=rest?rest.id:'';await idbPut('settings',{...S.settings,id:'cfg'});
+        await load();refreshAll();renderAI();closeSheet();toast('已删除')}},
+      {label:'取消',cls:'gray',fn:closeSheet}]});
+}
+function openAddCat(){
+  openSheet({title:'➕ 添加一只猫',sub:'支持多猫，每只猫数据完全独立',html:catForm({sex:'母',neutered:'未绝育'}),
+    actions:[{label:'创建档案',fn:async()=>{const d=readCatForm();if(!d.name){toast('请填写名字');return}
+      const id=uid();await idbPut('cats',{id,...d});
+      const now=Date.now();
+      await idbPut('reminders',{id:uid(),cat_id:id,type:'疫苗',label:'💉 年度疫苗',lastTs:now,cycle:365});
+      await idbPut('reminders',{id:uid(),cat_id:id,type:'驱虫',label:'🪱 体内驱虫',lastTs:now,cycle:90});
+      if(d.weight)await idbPut('logs',{id:uid(),cat_id:id,ts:now,type:'体重',status:'正常',note:d.weight+'kg',data:{value:d.weight},photos:[]});
+      S.settings.catId=id;await idbPut('settings',{...S.settings,id:'cfg'});
+      await load();refreshAll();renderAI();closeSheet();toast('已创建并切换到 '+d.name)}},
+      {label:'取消',cls:'gray',fn:closeSheet}]});
+}
+function openStats(){
+  const cost=S.logs.filter(l=>l.data&&l.data.cost).reduce((a,l)=>a+parseFloat(l.data.cost||0),0)
+            +S.logs.filter(l=>l.type==='花费'&&l.data&&l.data.value).reduce((a,l)=>a+parseFloat(l.data.value||0),0);
+  const byType={};S.logs.forEach(l=>byType[l.type]=(byType[l.type]||0)+1);
+  const arr=Object.entries(byType).sort((a,b)=>b[1]-a[1]);
+  const max=arr.length?arr[0][1]:1;
+  openSheet({title:'📊 数据统计',sub:`${S.cat?S.cat.name:''} · 共 ${S.logs.length} 条记录`,
+    html:`<div class="field"><label>累计花费</label><div style="font-size:19px;font-weight:700">¥ ${cost.toFixed(2)}</div></div>
+    <div class="field"><label>记录类型分布</label>${arr.map(([t,n])=>`<div style="display:flex;align-items:center;gap:7px;font-size:12px;padding:3px 0"><span style="width:74px;flex:0 0 auto">${esc(t)}</span><span style="height:8px;border-radius:4px;background:var(--accent);width:${Math.max(6,n/max*150)}px"></span><span style="color:var(--sub)">${n}</span></div>`).join('')||'<div class="empty">暂无数据</div>'}</div>`});
+}
+function openPrivacy(){
+  openSheet({title:'🔒 数据与隐私',sub:'当前版本：本地优先，未上云',
+    html:`<div class="field"><label>数据存放位置</label><div style="font-size:12px;line-height:1.7">全部记录、照片分析结果、对话都存在本机浏览器的 IndexedDB（库名 miaoji），不上传任何服务器。清除浏览器数据会一并删除，请定期用「导出 JSON」备份。</div></div>
+    <div class="field"><label>AI 调用时会发送什么</label><div style="font-size:12px;line-height:1.7">• 问答：你的问题 +（若开启助手记忆）最近 30 条记录摘要<br>• 拍照分析：压缩后的图片（≤800px）+ 分析类型 + 校准参考<br>• API 密钥只存在服务端代理，前端永不持有。</div></div>
+    <div class="field"><label>如何完全关闭上传</label><div style="font-size:12px;line-height:1.7">在「我的」清空 AI 代理 URL，助手会退回本地离线知识库，全程零联网。</div></div>
+    <div class="field" style="border-color:#f0b9a8;background:#fdf2ee"><label style="color:#b8442c">医疗免责</label><div style="font-size:12px;color:#9a4a37;line-height:1.6">本应用的所有分析与建议均为参考信息，不构成兽医诊断。任何健康疑虑请咨询执业兽医。</div></div>`});
+}
+async function exportJSON(){
+  const data={version:2,exportedAt:new Date().toISOString(),cats:await idbAll('cats'),logs:await idbAll('logs'),reminders:await idbAll('reminders'),chats:await idbAll('chats'),settings:await idbAll('settings')};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='miaoji-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  S.settings.lastBackup=new Date().toISOString().slice(0,10);
+  await idbPut('settings',{...S.settings,id:'cfg'});
+  const tip=document.getElementById('bkTip'); if(tip)tip.innerHTML='✅ 上次备份：'+S.settings.lastBackup;
+  toast('已导出 '+(data.logs.length)+' 条记录');
+}
+function importJSON(){
+  const i=document.createElement('input');i.type='file';i.accept='application/json';
+  i.onchange=async e=>{const f=e.target.files[0];if(!f)return;
+    try{const d=JSON.parse(await f.text());
+      if(!confirm('导入将合并到现有数据（同 id 覆盖），确认？'))return;
+      for(const k of ['cats','logs','reminders','chats'])if(Array.isArray(d[k]))for(const o of d[k])await idbPut(k,o);
+      await load();refreshAll();renderAI();toast('导入完成')}
+    catch(err){toast('导入失败：文件格式不正确')}};
+  i.click();
+}
+async function resetAll(){
+  if(!confirm('⚠️ 将清空本机全部猫咪数据且不可恢复，建议先导出备份。确认清空？'))return;
+  for(const s of STORES)await idbClear(s);
+  await seedIfEmpty();await load();refreshAll();renderAI();toast('已重置为初始演示数据');
+}
+
+/* ================= 导航 ================= */
+const PAGES={home:'p-home',tl:'p-tl',log:'p-log',ai:'p-ai',me:'p-me'};
+function go(k){
+  document.querySelectorAll('.nav .tab').forEach(x=>x.classList.toggle('on',x.dataset.t===k));
+  Object.values(PAGES).forEach(id=>$(id).classList.add('hidden'));
+  $(PAGES[k]).classList.remove('hidden');
+  ({home:renderHome,log:renderLog,tl:renderTimeline,ai:renderAI,me:renderMe})[k]();
+  $(PAGES[k]).scrollTop=0;
+}
+document.querySelectorAll('.nav .tab,.nav .fab').forEach(t=>t.onclick=()=>go(t.dataset.t));
+$('mask').onclick=()=>{$('ingestModal').classList.remove('show');closeSheet();closeVision()};
+
+/* ================= 启动 ================= */
+(async()=>{
+  await idbOpen();await seedIfEmpty();await load();
+  renderHome();renderLog();renderTimeline();renderMe();renderAI();
+  go('home');tickClock();setInterval(tickClock,30000);
+  probeIngest();setInterval(probeIngest,60000);   // 本地素材抓取服务探测
+  if(!sessionStorage.getItem('bkHint') && !S.settings.lastBackup && (S.cats.length||S.logs.length)){
+    sessionStorage.setItem('bkHint','1');
+    setTimeout(()=>toast('💡 数据只在本机，记得去「我的」导出备份'),1200);
+  }
+  window.__ready=true;
+})();
+</script>
+</body>
+</html>

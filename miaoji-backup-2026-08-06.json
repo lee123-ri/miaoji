@@ -1,0 +1,308 @@
+{
+  "version": 2,
+  "exportedAt": "2026-08-06T09:37:28.163Z",
+  "cats": [
+    {
+      "id": "c1",
+      "name": "咪咪Pro",
+      "breed": "英短",
+      "sex": "母",
+      "birth": "2025-10-01",
+      "weight": 3.9,
+      "neutered": "已绝育"
+    },
+    {
+      "id": "mshbo6le6kl33",
+      "name": "二毛",
+      "breed": "狸花",
+      "sex": "母",
+      "birth": "",
+      "weight": 4.6,
+      "neutered": "未绝育"
+    }
+  ],
+  "logs": [
+    {
+      "id": "mshbnedyou3nc",
+      "cat_id": "c1",
+      "ts": 1786009008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "0.12kg",
+      "data": {
+        "value": 0.12
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedys7d7r",
+      "cat_id": "c1",
+      "ts": 1783417008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "0.45kg",
+      "data": {
+        "value": 0.45
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedyx9mcc",
+      "cat_id": "c1",
+      "ts": 1780825008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "0.95kg",
+      "data": {
+        "value": 0.95
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedz1q32z",
+      "cat_id": "c1",
+      "ts": 1770457008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "3.1kg",
+      "data": {
+        "value": 3.1
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedz2nah9",
+      "cat_id": "c1",
+      "ts": 1760089008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "3.9kg",
+      "data": {
+        "value": 3.9
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedz51qxp",
+      "cat_id": "c1",
+      "ts": 1767865008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "3.4kg",
+      "data": {
+        "value": 3.4
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedz5b90r",
+      "cat_id": "c1",
+      "ts": 1785577008022,
+      "type": "驱虫",
+      "status": "正常",
+      "note": "体内 · 拜耳",
+      "data": {
+        "kind": "体内",
+        "brand": "拜耳"
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedz5q2hy",
+      "cat_id": "c1",
+      "ts": 1773049008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "2.7kg",
+      "data": {
+        "value": 2.7
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedz9z9dx",
+      "cat_id": "c1",
+      "ts": 1778233008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "1.6kg",
+      "data": {
+        "value": 1.6
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedzjvgyc",
+      "cat_id": "c1",
+      "ts": 1775641008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "2.2kg",
+      "data": {
+        "value": 2.2
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedzxbd4y",
+      "cat_id": "c1",
+      "ts": 1765273008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "3.6kg",
+      "data": {
+        "value": 3.6
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnedzyg53r",
+      "cat_id": "c1",
+      "ts": 1762681008022,
+      "type": "体重",
+      "status": "正常",
+      "note": "3.8kg",
+      "data": {
+        "value": 3.8
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnee0ppzky",
+      "cat_id": "c1",
+      "ts": 1783849008022,
+      "type": "里程碑",
+      "status": "正常",
+      "note": "第一次上猫爬架",
+      "data": {
+        "title": "第一次上猫爬架"
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnee0yu3co",
+      "cat_id": "c1",
+      "ts": 1784540208022,
+      "type": "就医病历",
+      "status": "异常",
+      "note": "肠胃不适，医嘱用药5天",
+      "data": {
+        "reason": "呕吐两天",
+        "diag": "肠胃不适"
+      },
+      "photos": []
+    },
+    {
+      "id": "mshbnra0lniyn",
+      "cat_id": "c1",
+      "ts": 1785544200000,
+      "type": "喂食",
+      "status": "正常",
+      "note": "分量:50g",
+      "data": {
+        "value": "50"
+      },
+      "remark": "",
+      "photos": []
+    },
+    {
+      "id": "mshbns0ul4pn8",
+      "cat_id": "c1",
+      "ts": 1786009020000,
+      "type": "呕吐",
+      "status": "异常",
+      "note": "次数:3",
+      "data": {
+        "count": "3"
+      },
+      "remark": "",
+      "photos": []
+    },
+    {
+      "id": "mshbo1wocpt69",
+      "cat_id": "c1",
+      "ts": 1786009038504,
+      "type": "喂食",
+      "status": "正常",
+      "note": "📷AI · portion_g:45 · kcal:180 · protein_pct:38 · fat_pct:22 · carb_pct:40 · balanced:否 · advice:蛋白偏低、碳水偏高，建议提高肉类占比。 | 复核:适中(30-60g) | 置信度0.7",
+      "data": {
+        "value": 45
+      },
+      "remark": "AI 拍照分析",
+      "photos": []
+    },
+    {
+      "id": "mshbo6llnfn0f",
+      "cat_id": "mshbo6le6kl33",
+      "ts": 1786009044585,
+      "type": "体重",
+      "status": "正常",
+      "note": "4.6kg",
+      "data": {
+        "value": 4.6
+      },
+      "photos": []
+    }
+  ],
+  "reminders": [
+    {
+      "id": "mshbnee0i7nmq",
+      "cat_id": "c1",
+      "type": "疫苗",
+      "label": "💉 年度疫苗",
+      "lastTs": 1756460208022,
+      "cycle": 365
+    },
+    {
+      "id": "mshbnee0mh77t",
+      "cat_id": "c1",
+      "type": "驱虫",
+      "label": "🪱 体内驱虫",
+      "lastTs": 1785577008022,
+      "cycle": 90
+    },
+    {
+      "id": "mshbnee0uh780",
+      "cat_id": "c1",
+      "type": "体检",
+      "label": "🩺 年度体检",
+      "lastTs": 1766137008022,
+      "cycle": 365
+    },
+    {
+      "id": "mshbnig7snof2",
+      "cat_id": "c1",
+      "type": "自定义",
+      "label": "✂️ 剪指甲",
+      "cycle": 14,
+      "lastTs": 1785974400000
+    },
+    {
+      "id": "mshbo6llek5i8",
+      "cat_id": "mshbo6le6kl33",
+      "type": "驱虫",
+      "label": "🪱 体内驱虫",
+      "lastTs": 1786009044585,
+      "cycle": 90
+    },
+    {
+      "id": "mshbo6llwzvn4",
+      "cat_id": "mshbo6le6kl33",
+      "type": "疫苗",
+      "label": "💉 年度疫苗",
+      "lastTs": 1786009044585,
+      "cycle": 365
+    }
+  ],
+  "chats": [],
+  "settings": [
+    {
+      "id": "cfg",
+      "workerUrl": "",
+      "assistantOn": false,
+      "catId": "c1",
+      "refBowlCm": 14,
+      "ingestUrl": ""
+    }
+  ]
+}
