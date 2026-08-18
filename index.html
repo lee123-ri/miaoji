@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="theme-color" content="#e8915b" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="apple-touch-icon" href="/icon-192.png" />
 <title>喵迹</title>
 <style>
   :root{--bg:#f4efe8;--card:#fff;--ink:#2b2620;--sub:#938a7c;--line:#ece4d8;
@@ -1538,6 +1540,13 @@ $('mask').onclick=()=>{$('ingestModal').classList.remove('show');closeSheet();cl
   }
   window.__ready=true;
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+  }
 </script>
 </body>
 </html>

@@ -69,7 +69,9 @@ echo "==> [5/8] 安装后端依赖"
 
 echo "==> [6/8] 部署前端静态文件"
 mkdir -p "$WWW_DIR"
-cp "$APP_DIR/index.html" "$WWW_DIR/index.html"
+for f in index.html manifest.webmanifest sw.js icon.svg icon-192.png icon-512.png; do
+  [ -f "$APP_DIR/$f" ] && cp "$APP_DIR/$f" "$WWW_DIR/$f"
+done
 chown -R "$APP_USER:$APP_USER" "$WWW_DIR"
 
 echo "==> [7/8] 配置 nginx + 防火墙"
