@@ -28,7 +28,7 @@ set -a; source "$ENVFILE"; set +a
 
 echo "==> [2/8] 安装依赖（nginx / Node20 / 编译工具）"
 command -v dnf >/dev/null 2>&1 || { echo "本脚本面向 Alibaba Cloud Linux 3（dnf）"; exit 1; }
-dnf install -y nginx gcc-c++ make python3 >/dev/null
+dnf install -y nginx git gcc-c++ make python3 >/dev/null
 if ! command -v node >/dev/null 2>&1 || [ "$(node -v | cut -d. -f1 | tr -d v)" -lt 18 ]; then
   echo "    安装 Node.js 20 LTS (NodeSource)…"
   curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - >/dev/null
