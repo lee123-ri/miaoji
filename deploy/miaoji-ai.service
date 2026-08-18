@@ -1,0 +1,16 @@
+[Unit]
+Description=喵迹 AI 代理 (DeepSeek 文本 + 通义千问视觉)
+After=network.target
+
+[Service]
+Type=simple
+User=miaoji
+WorkingDirectory=/opt/miaoji
+ExecStart=/usr/bin/node /opt/miaoji/local-ai-proxy.mjs
+Restart=on-failure
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
