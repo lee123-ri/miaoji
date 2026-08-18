@@ -10,6 +10,14 @@ node_modules/
 dist/
 *.log
 
+# Local database & runtime data
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+
 # OS
 .DS_Store
 Thumbs.db

@@ -95,6 +95,18 @@
   .toast{position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(43,38,32,.92);color:#fff;font-size:12px;padding:9px 16px;border-radius:20px;z-index:40;opacity:0;transition:opacity .3s;max-width:310px;text-align:center;pointer-events:none;line-height:1.5}
   .toast.show{opacity:1}
   .empty{text-align:center;color:var(--sub);font-size:12px;padding:26px 10px;line-height:1.7}
+  /* —— 登录 / 家庭 —— */
+  .authscreen{position:absolute;inset:0;z-index:60;background:linear-gradient(160deg,#fbeede,#f6d9c4);display:flex;flex-direction:column;padding:54px 26px 30px;overflow-y:auto}
+  .authscreen.hidden{display:none}
+  .authscreen .logo{font-size:40px;text-align:center;margin-bottom:4px}
+  .authscreen h2{text-align:center;font-size:22px;margin-bottom:4px;color:#7a4a22}
+  .authscreen .sub{text-align:center;font-size:12px;color:#8a5a2b;margin-bottom:22px;line-height:1.6}
+  .authscreen .field{background:#fff;border:1px solid #e7d8c4;border-radius:12px;padding:11px 13px;margin-bottom:11px}
+  .authscreen .field label{font-size:11px;color:var(--sub);display:block;margin-bottom:4px}
+  .authscreen .field input{width:100%;border:none;outline:none;font-size:15px;background:transparent;color:var(--ink)}
+  .authscreen .btn{width:100%;background:linear-gradient(135deg,#e8915b,#d97b45);color:#fff;border:none;border-radius:13px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
+  .authscreen .link{text-align:center;font-size:12px;color:#8a5a2b;margin-top:14px;cursor:pointer}
+  .authscreen .hint{font-size:11px;color:#a9794f;text-align:center;margin-top:auto;padding-top:18px;line-height:1.6}
   /* —— 养护中心 —— */
   .stage{background:linear-gradient(135deg,#fff6ec,#fdece0);border:1px solid #f3d9c2;border-radius:14px;padding:12px 13px;margin-bottom:12px}
   .stage .sh{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:#8a5a2b}
@@ -213,6 +225,25 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <div class="authscreen hidden" id="authScreen">
+    <div class="logo">🐱</div>
+    <h2 id="auTitle">登录喵迹</h2>
+    <div class="sub" id="auSub"></div>
+    <div id="authForm">
+      <div class="field"><label>用户名</label><input id="auUser" placeholder="2 位以上" autocomplete="username"></div>
+      <div class="field"><label>密码</label><input id="auPass" type="password" placeholder="6 位以上" autocomplete="current-password"></div>
+      <button class="btn" id="auBtn" onclick="auSubmit()">登录</button>
+      <div class="link" id="auSwitch" onclick="toggleAuthMode()"></div>
+    </div>
+    <div id="hhForm" class="hidden">
+      <div class="field"><label>家庭组名称</label><input id="hhName" placeholder="如 沛东家猫窝"></div>
+      <button class="btn" onclick="createHousehold()">创建并进入</button>
+      <div class="field" style="margin-top:14px"><label>或用邀请码加入</label><input id="hhCode" placeholder="家人发来的邀请码"></div>
+      <button class="btn" style="background:#6ba368" onclick="joinHousehold()">加入家庭</button>
+    </div>
+    <div class="hint">喵迹 · 多猫家庭健康记录与协作<br>数据存云端，家人共维护一份猫数据</div>
+  </div>
 </div>
 
 <script>
@@ -223,12 +254,48 @@ function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open(DB.name
   r.onupgradeneeded=e=>{const db=e.target.result;STORES.forEach(s=>{if(!db.objectStoreNames.contains(s))db.createObjectStore(s,{keyPath:'id'})})};
   r.onsuccess=e=>{DB.db=e.target.result;res()};r.onerror=e=>rej(e.target.error)})}
 function idbAll(s){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readonly').objectStore(s).getAll();t.onsuccess=()=>res(t.result||[]);t.onerror=e=>rej(e.target.error)})}
-function idbPut(s,o){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readwrite').objectStore(s).put(o);t.onsuccess=()=>res(o);t.onerror=e=>rej(e.target.error)})}
-function idbDel(s,id){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readwrite').objectStore(s).delete(id);t.onsuccess=()=>res();t.onerror=e=>rej(e.target.error)})}
+function idbPut(s,o){return localIdbPut(s,o).then(r=>{cloudPush(s,o);return r})}
+function idbDel(s,id){return localIdbDel(s,id).then(()=>{cloudPush(s,{id,_deleted:true})})}
 function idbClear(s){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readwrite').objectStore(s).clear();t.onsuccess=()=>res();t.onerror=e=>rej(e.target.error)})}
 const uid=()=>(Date.now().toString(36)+Math.random().toString(36).slice(2,7));
 const $=id=>document.getElementById(id);
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+/* ================= 云端 + 账号 ================= */
+const SYNC_STORES=['cats','logs','reminders','chats'];
+const CONFIG={api:(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:3000':'',ai:(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:8787':''};
+let AUTH={token:localStorage.getItem('mj_token')||null,user:null,hid:localStorage.getItem('mj_hid')||null,households:[]};
+function authReady(){return !!AUTH.token && !!AUTH.hid}
+function setToken(t){AUTH.token=t;if(t)localStorage.setItem('mj_token',t);else localStorage.removeItem('mj_token')}
+function setHid(h){AUTH.hid=h;if(h)localStorage.setItem('mj_hid',h);else localStorage.removeItem('mj_hid')}
+function authHeaders(){return {'Content-Type':'application/json','Authorization':'Bearer '+AUTH.token}}
+async function apiFetch(path,opts={}){const base=CONFIG.api||location.origin;const r=await fetch(base+path,{...opts,headers:{...authHeaders(),...(opts.headers||{})}});if(r.status===401){await doLogout();throw new Error('登录已失效，请重新登录')}if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+/* 本地原语：云端封装前的基础读写（供 idbPut/idbDel 调用，保证离线可用） */
+function localIdbPut(s,o){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readwrite').objectStore(s).put(o);t.onsuccess=()=>res(o);t.onerror=e=>rej(e.target.error)})}
+function localIdbDel(s,id){return new Promise((res,rej)=>{const t=DB.db.transaction(s,'readwrite').objectStore(s).delete(id);t.onsuccess=()=>res();t.onerror=e=>rej(e.target.error)})}
+/* 云端推送：写入本地后异步同步到云端（settings 等本地配置不同步） */
+async function cloudPush(store,obj){if(!SYNC_STORES.includes(store)||!authReady())return;try{const changes={};changes[store]=[obj];await apiFetch('/api/sync?household_id='+encodeURIComponent(AUTH.hid),{method:'POST',body:JSON.stringify({changes})});localStorage.removeItem('mj_dirty')}catch(e){localStorage.setItem('mj_dirty','1')}}
+/* 离线改动回放：网络恢复时把本地全量重新推一遍（upsert 幂等，last-write-wins） */
+async function flushSync(){if(!authReady()||!localStorage.getItem('mj_dirty'))return;try{const changes={};for(const s of SYNC_STORES)changes[s]=await idbAll(s);await apiFetch('/api/sync?household_id='+encodeURIComponent(AUTH.hid),{method:'POST',body:JSON.stringify({changes})});localStorage.removeItem('mj_dirty');toast('☁️ 离线改动已同步')}catch(e){}}
+function effectiveAi(){return (S.settings&&S.settings.aiProxy)||CONFIG.ai}
+function effectiveApi(){return (S.settings&&S.settings.apiBase)||CONFIG.api}
+/* 登录 / 注册 / 家庭组 */
+async function apiMe(){const j=await apiFetch('/api/households/me');AUTH.households=j.households||[];return AUTH.households}
+async function pullSync(){const j=await apiFetch('/api/sync?household_id='+encodeURIComponent(AUTH.hid),{method:'POST',body:JSON.stringify({since:0})});for(const s of SYNC_STORES)for(const o of (j[s]||[]))await localIdbPut(s,o);localStorage.removeItem('mj_dirty')}
+async function clearCloudStores(){for(const s of SYNC_STORES)await idbClear(s)}
+async function enterApp(){await clearCloudStores();await pullSync();await load();refreshAll();renderAI();document.getElementById('authScreen').classList.add('hidden');go('home');toast('☁️ 已同步家庭数据')}
+async function bootAuth(){if(!AUTH.token){showAuth('login');return false}try{await apiMe()}catch(e){setToken(null);showAuth('login');return false}if(!AUTH.households.length){showHouseholdSetup();return false}if(!AUTH.hid||!AUTH.households.find(h=>h.id===AUTH.hid))setHid(AUTH.households[0].id);await pullSync();return true}
+async function doRegister(){const u=$('auUser').value.trim(),p=$('auPass').value.trim();if(u.length<2||p.length<6){toast('用户名≥2位、密码≥6位');return}try{const j=await apiFetch('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,password:p})});setToken(j.token);AUTH.user=j.user;await apiMe();showHouseholdSetup()}catch(e){toast('注册失败：'+(e.message||e))}}
+async function doLogin(){const u=$('auUser').value.trim(),p=$('auPass').value.trim();if(!u||!p){toast('请输入用户名和密码');return}try{const j=await apiFetch('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p})});setToken(j.token);AUTH.user=j.user;await apiMe();if(!AUTH.households.length)showHouseholdSetup();else{setHid(AUTH.hid&&AUTH.households.find(h=>h.id===AUTH.hid)?AUTH.hid:AUTH.households[0].id);await enterApp()}}catch(e){toast('登录失败：'+(e.message||e))}}
+async function doLogout(){setToken(null);setHid(null);AUTH.user=null;AUTH.households=[];showAuth('login');toast('已退出登录')}
+async function createHousehold(){const n=$('hhName').value.trim()||((AUTH.user&&AUTH.user.username)||'我')+'的家';try{const j=await apiFetch('/api/households',{method:'POST',body:JSON.stringify({name:n})});setHid(j.id);await enterApp()}catch(e){toast('创建失败：'+(e.message||e))}}
+async function joinHousehold(){const c=$('hhCode').value.trim().toUpperCase();if(!c){toast('请输入邀请码');return}try{const j=await apiFetch('/api/households/join',{method:'POST',body:JSON.stringify({invite_code:c})});setHid(j.id);await enterApp()}catch(e){toast('加入失败：'+(e.message||e))}}
+async function showInvite(){if(!authReady())return;const h=AUTH.households.find(x=>x.id===AUTH.hid);if(!h){toast('无家庭组');return}try{const j=await apiFetch('/api/households/me');const hh=j.households.find(x=>x.id===AUTH.hid);const code=hh?hh.invite_code:'?';if(navigator.clipboard)navigator.clipboard.writeText(code);toast('邀请码已复制：'+code+'（发给家人，在「我的-家庭」里粘贴加入）')}catch(e){toast('获取邀请码失败')}}
+async function switchHousehold(id){setHid(id);await enterApp()}
+function showAuth(mode){const a=document.getElementById('authScreen');a.classList.remove('hidden');a.dataset.mode=mode||'login';document.getElementById('authForm').classList.remove('hidden');document.getElementById('hhForm').classList.add('hidden');$('auTitle').textContent=mode==='register'?'创建账号':'登录喵迹';$('auSub').textContent=mode==='register'?'用户名 + 密码，数据存云端、家人共维护':'欢迎回来，数据已同步到云端';$('auSwitch').textContent=mode==='register'?'已有账号？去登录':'还没有账号？去注册';$('auBtn').textContent=mode==='register'?'注册并进入':'登录';$('auUser').value='';$('auPass').value=''}
+function showHouseholdSetup(){const a=document.getElementById('authScreen');a.classList.remove('hidden');a.dataset.mode='hh';document.getElementById('authForm').classList.add('hidden');document.getElementById('hhForm').classList.remove('hidden');$('auTitle').textContent='创建你的家庭组';$('auSub').textContent='一份猫数据，全家一起记。创建后可邀请家人加入。';$('hhName').value=(AUTH.user&&AUTH.user.username||'我')+'的家';$('hhCode').value=''}
+function auSubmit(){const m=document.getElementById('authScreen').dataset.mode;if(m==='register')doRegister();else if(m==='login')doLogin();}
+function toggleAuthMode(){const m=document.getElementById('authScreen').dataset.mode;showAuth(m==='register'?'login':'register')}
 
 /* ================= 常量 ================= */
 const CATS=[
@@ -503,6 +570,7 @@ let tlFilter='全部', curveRange=90;
 
 /* ================= 种子 ================= */
 async function seedIfEmpty(){
+  if(authReady())return;   // 已登录云端模式不下演示数据
   const cats=await idbAll('cats'); if(cats.length)return;
   await idbPut('cats',{id:'c1',name:'咪咪',breed:'英短',sex:'母',birth:'2025-10-01',weight:3.9,neutered:'未绝育'});
   const now=Date.now(),D=86400000;
@@ -523,7 +591,8 @@ async function seedIfEmpty(){
 
 /* ================= 加载 ================= */
 async function load(){
-  const st=await idbAll('settings'); S.settings=st[0]||{id:'cfg',workerUrl:'',assistantOn:true,catId:'c1',refBowlCm:12,ingestUrl:''};
+  const st=await idbAll('settings'); S.settings=st[0]||{id:'cfg',workerUrl:'',assistantOn:true,catId:'c1',refBowlCm:12,ingestUrl:'',aiProxy:'',apiBase:''};
+  S.settings.workerUrl=effectiveAi()||'';   // AI 代理地址来自配置（用户无需填写）
   S.cats=await idbAll('cats');
   S.cat=S.cats.find(c=>c.id===S.settings.catId)||S.cats[0]||null;
   const all=await idbAll('logs'); S.logs=S.cat?all.filter(l=>l.cat_id===S.cat.id):[];
@@ -1266,13 +1335,17 @@ function renderMe(){
   $('p-me').innerHTML=`
     <div class="card"><div class="prof" onclick="openCatEdit()"><div class="ava">🐈</div><div><div style="font-size:15px;font-weight:700">${S.cat?esc(S.cat.name):'未建档案'}</div><div style="font-size:11px;color:var(--sub)">${S.cat?esc([S.cat.breed,S.cat.sex,S.cat.birth,(S.cat.weight||'')+'kg',S.cat.neutered||''].filter(Boolean).join(' · ')):'点此建立档案'}</div></div><div class="ar">›</div></div>
       ${S.cat?`<div style="font-size:11px;color:var(--sub);margin-top:9px">月龄 ${monthAge(S.cat.birth)} · 记录 ${S.logs.length} 条 · 提醒 ${S.reminders.length} 条</div>`:''}</div>
-    <div class="card"><div class="setrow"><label>🤖 AI 代理 URL（国内云函数 / Worker）</label><input id="wUrl" placeholder="https://your-proxy.example.com" value="${esc(S.settings.workerUrl||'')}"></div>
+    <div class="card" id="hhCard">${renderHouseholdInner()}</div>
+    <div class="card"><div class="setrow"><label>🤖 AI 助手</label><div style="font-size:12px;color:var(--sub);line-height:1.5">内置云端 AI：DeepSeek 问答 + 通义视觉拍照分析，无需任何配置。${S.settings.workerUrl?'<b style="color:var(--accent2)">已连接</b>':'<b style="color:var(--warn)">未连接</b>'}</div></div>
       <div class="setrow"><label>🧠 助手记忆（开启后会把记录摘要发给 AI）</label><div class="chips single" id="aOn"><span class="chip ${S.settings.assistantOn?'on':''}">开启</span><span class="chip ${!S.settings.assistantOn?'on':''}">关闭</span></div></div>
       <div class="setrow"><label>🍚 喂食碗内径 cm（食物分析校准基准）</label><input id="bowl" type="number" placeholder="12" value="${S.settings.refBowlCm||''}"></div>
       <div class="setrow"><label>📥 本地素材抓取服务（留空=与本页同源）</label><input id="ingUrl" placeholder="http://192.168.1.x:7788" value="${esc(S.settings.ingestUrl||'')}"></div>
       <button class="save" onclick="saveSettings()">保存设置</button>
-      <button class="save gray" onclick="testProxy()">测试 AI 代理连通性</button>
-      <button class="save gray" onclick="testIngest()">测试素材抓取服务</button></div>
+      <button class="save gray" onclick="testIngest()">测试素材抓取服务</button>
+      <div class="setrow" style="margin-top:8px"><label style="font-size:10.5px;color:var(--sub)">🔧 高级 · 部署用（留空=默认）</label></div>
+      <div class="setrow"><input id="apiBase" placeholder="API 基址，如 https://miaoji.xxx/api" value="${esc(S.settings.apiBase||'')}"></div>
+      <div class="setrow"><input id="aiProxy" placeholder="AI 代理地址，如 https://miaoji.xxx" value="${esc(S.settings.aiProxy||'')}"></div>
+    </div>
     <div class="card" style="border:1.5px solid var(--warn,#e8915b);background:rgba(232,145,91,.06)">
       <div style="font-weight:700;font-size:14px;margin-bottom:4px">💾 数据备份（强烈建议）</div>
       <div style="font-size:11.5px;color:var(--sub);line-height:1.6;margin-bottom:9px">所有数据只存在<b>本机浏览器</b>，换设备 / 清缓存会丢失。定期导出 JSON，换手机或重装时可一键恢复。</div>
@@ -1293,16 +1366,34 @@ function renderMe(){
       <li onclick="importJSON()"><span>📥 导入备份 (JSON)</span><span class="ar">›</span></li>
       <li onclick="openPrivacy()"><span>🔒 数据与隐私说明</span><span class="ar">›</span></li>
       <li onclick="resetAll()"><span style="color:var(--warn)">🗑️ 清空本地数据</span><span class="ar">›</span></li>
+      <li onclick="doLogout()"><span>🚪 退出登录</span><span class="ar">›</span></li>
     </ul></div>
-    <div style="text-align:center;font-size:11px;color:var(--sub);padding-bottom:10px">喵迹 MVP · 本地优先 · 数据只存在本机浏览器</div>`;
+    <div style="text-align:center;font-size:11px;color:var(--sub);padding-bottom:10px">喵迹 · ${authReady()?'云端家庭版 · 数据存于服务端':'本地模式 · 数据只存在本机'}</div>`;
   probeIngest();
 }
 function monthAge(birth){if(!birth)return '—';const b=new Date(birth),n=new Date();return Math.max(0,(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth())+' 个月'}
+function renderHouseholdInner(){
+  if(!authReady())return `<div style="font-weight:700;font-size:14px;margin-bottom:6px">👨‍👩‍👧 家庭协作</div><div style="font-size:11.5px;color:var(--sub);line-height:1.6;margin-bottom:9px">登录后和家人共建一份猫数据，互相看到记录、提醒与对话。</div><button class="save" onclick="showAuth('login')">登录 / 注册</button>`;
+  const cur=AUTH.households.find(h=>h.id===AUTH.hid)||{name:'—'};
+  let h=`<div style="font-weight:700;font-size:14px;margin-bottom:3px">👨‍👩‍👧 ${esc(cur.name)}</div>`;
+  h+=`<div style="font-size:11px;color:var(--sub);margin-bottom:9px">当前家庭组 · 共 ${AUTH.households.length} 个</div>`;
+  h+=`<button class="save sec" onclick="showInvite()">📨 邀请家人（复制邀请码）</button>`;
+  if(AUTH.households.length>1){
+    h+=`<div style="margin-top:9px;font-size:11px;color:var(--sub)">切换家庭：</div>`;
+    h+=AUTH.households.map(x=>`<div class="rrow" onclick="switchHousehold('${x.id}')"><span>${x.id===AUTH.hid?'✅ ':''}${esc(x.name)}</span><span class="ar">切换 ›</span></div>`).join('');
+  }
+  h+=`<div style="display:flex;gap:8px;margin-top:9px"><button class="save gray" style="flex:1" onclick="createHouseholdFlow()">➕ 建新家庭</button><button class="save gray" style="flex:1" onclick="joinHouseholdFlow()">🔑 加入家庭</button></div>`;
+  return h;
+}
+function createHouseholdFlow(){const n=prompt('新家庭组名称：',(AUTH.user&&AUTH.user.username||'我')+'的家');if(n===null)return;(async()=>{try{const j=await apiFetch('/api/households',{method:'POST',body:JSON.stringify({name:(n.trim()||'我的家')})});setHid(j.id);await enterApp()}catch(e){toast('创建失败：'+(e.message||e))}})()}
+function joinHouseholdFlow(){const c=prompt('输入家人发来的邀请码：');if(!c)return;(async()=>{try{const j=await apiFetch('/api/households/join',{method:'POST',body:JSON.stringify({invite_code:c.trim().toUpperCase()})});setHid(j.id);await enterApp()}catch(e){toast('加入失败：'+(e.message||e))}})()}
 async function saveSettings(){
-  S.settings.workerUrl=$('wUrl').value.trim();
   S.settings.assistantOn=(document.querySelector('#aOn .chip.on')?.textContent||'开启')==='开启';
   S.settings.refBowlCm=parseFloat($('bowl').value)||12;
   S.settings.ingestUrl=($('ingUrl')?$('ingUrl').value.trim():S.settings.ingestUrl)||'';
+  S.settings.apiBase=($('apiBase')?$('apiBase').value.trim():'')||'';
+  S.settings.aiProxy=($('aiProxy')?$('aiProxy').value.trim():'')||'';
+  S.settings.workerUrl=effectiveAi()||'';
   await idbPut('settings',{...S.settings,id:'cfg'});
   await load();renderMe();renderAI();probeIngest();toast('设置已保存');
 }
@@ -1317,8 +1408,8 @@ async function testIngest(){
   }catch(e){toast('❌ 未连上：请在电脑执行 node ingest-server.mjs')}
 }
 async function testProxy(){
-  const u=$('wUrl').value.trim();
-  if(!u){toast('未填代理 URL — 当前为离线知识库模式，功能可用但非真实 AI');return}
+  const u=effectiveAi()||S.settings.workerUrl;
+  if(!u){toast('未配置 AI 代理地址 — 当前为离线知识库模式');return}
   toast('正在测试…');
   try{const r=await fetch(u+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:'ping',context:''})});
     const j=await r.json();toast(j.content?'✅ 代理连通，AI 已可用':'⚠️ 有响应但格式异常：'+JSON.stringify(j).slice(0,60))}
@@ -1384,8 +1475,8 @@ function openStats(){
     <div class="field"><label>记录类型分布</label>${arr.map(([t,n])=>`<div style="display:flex;align-items:center;gap:7px;font-size:12px;padding:3px 0"><span style="width:74px;flex:0 0 auto">${esc(t)}</span><span style="height:8px;border-radius:4px;background:var(--accent);width:${Math.max(6,n/max*150)}px"></span><span style="color:var(--sub)">${n}</span></div>`).join('')||'<div class="empty">暂无数据</div>'}</div>`});
 }
 function openPrivacy(){
-  openSheet({title:'🔒 数据与隐私',sub:'当前版本：本地优先，未上云',
-    html:`<div class="field"><label>数据存放位置</label><div style="font-size:12px;line-height:1.7">全部记录、照片分析结果、对话都存在本机浏览器的 IndexedDB（库名 miaoji），不上传任何服务器。清除浏览器数据会一并删除，请定期用「导出 JSON」备份。</div></div>
+  openSheet({title:'🔒 数据与隐私',sub:authReady()?'当前版本：云端家庭版，数据存服务端':'当前版本：本地模式，未上云',
+    html:`<div class="field"><label>数据存放位置</label><div style="font-size:12px;line-height:1.7">${authReady()?'登录后，全部记录、照片分析结果、对话都存于服务端数据库（阿里云），按家庭组隔离，你和受邀家人共享同一份数据。本机浏览器仅作缓存。':'全部记录、照片分析结果、对话都存在本机浏览器的 IndexedDB（库名 miaoji），不上传任何服务器。清除浏览器数据会一并删除，请定期用「导出 JSON」备份。'}</div></div>
     <div class="field"><label>AI 调用时会发送什么</label><div style="font-size:12px;line-height:1.7">• 问答：你的问题 +（若开启助手记忆）最近 30 条记录摘要<br>• 拍照分析：压缩后的图片（≤800px）+ 分析类型 + 校准参考<br>• API 密钥只存在服务端代理，前端永不持有。</div></div>
     <div class="field"><label>如何完全关闭上传</label><div style="font-size:12px;line-height:1.7">在「我的」清空 AI 代理 URL，助手会退回本地离线知识库，全程零联网。</div></div>
     <div class="field" style="border-color:#f0b9a8;background:#fdf2ee"><label style="color:#b8442c">医疗免责</label><div style="font-size:12px;color:#9a4a37;line-height:1.6">本应用的所有分析与建议均为参考信息，不构成兽医诊断。任何健康疑虑请咨询执业兽医。</div></div>`});
@@ -1410,6 +1501,7 @@ function importJSON(){
   i.click();
 }
 async function resetAll(){
+  if(authReady()){if(!confirm('将丢弃本机未同步的离线改动，并从云端重新拉取最新数据？'))return;await clearCloudStores();await pullSync();await load();refreshAll();renderAI();toast('已从云端刷新');return}
   if(!confirm('⚠️ 将清空本机全部猫咪数据且不可恢复，建议先导出备份。确认清空？'))return;
   for(const s of STORES)await idbClear(s);
   await seedIfEmpty();await load();refreshAll();renderAI();toast('已重置为初始演示数据');
@@ -1429,11 +1521,17 @@ $('mask').onclick=()=>{$('ingestModal').classList.remove('show');closeSheet();cl
 
 /* ================= 启动 ================= */
 (async()=>{
-  await idbOpen();await seedIfEmpty();await load();
+  await idbOpen();
+  const ok=await bootAuth();
+  if(!ok)await seedIfEmpty();
+  await load();
   renderHome();renderLog();renderTimeline();renderMe();renderAI();
   go('home');tickClock();setInterval(tickClock,30000);
   probeIngest();setInterval(probeIngest,60000);   // 本地素材抓取服务探测
-  if(!sessionStorage.getItem('bkHint') && !S.settings.lastBackup && (S.cats.length||S.logs.length)){
+  window.addEventListener('online',flushSync);
+  if(authReady()){
+    if(localStorage.getItem('mj_dirty'))flushSync();   // 上线后回放离线改动
+  } else if(!sessionStorage.getItem('bkHint') && !S.settings.lastBackup && (S.cats.length||S.logs.length)){
     sessionStorage.setItem('bkHint','1');
     setTimeout(()=>toast('💡 数据只在本机，记得去「我的」导出备份'),1200);
   }
