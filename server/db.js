@@ -50,6 +50,7 @@ export function initDb() {
       weight REAL,
       neutered INTEGER,
       avatar TEXT,
+      rev INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       deleted_at TEXT
@@ -60,8 +61,13 @@ export function initDb() {
       household_id TEXT NOT NULL REFERENCES households(id) ON DELETE CASCADE,
       cat_id TEXT NOT NULL REFERENCES cats(id) ON DELETE CASCADE,
       type TEXT NOT NULL,
-      timestamp TEXT NOT NULL,
-      payload TEXT NOT NULL,
+      ts INTEGER NOT NULL,
+      status TEXT,
+      note TEXT,
+      data TEXT,
+      photos TEXT,
+      remark TEXT,
+      rev INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       deleted_at TEXT
@@ -72,9 +78,13 @@ export function initDb() {
       household_id TEXT NOT NULL REFERENCES households(id) ON DELETE CASCADE,
       cat_id TEXT REFERENCES cats(id) ON DELETE SET NULL,
       title TEXT NOT NULL,
-      due_at TEXT,
+      type TEXT,
+      care_id TEXT,
+      last_ts INTEGER,
       cycle_days INTEGER,
+      due_at TEXT,
       status TEXT NOT NULL DEFAULT 'pending',
+      rev INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       deleted_at TEXT
@@ -83,20 +93,32 @@ export function initDb() {
     CREATE TABLE IF NOT EXISTS chats (
       id TEXT PRIMARY KEY,
       household_id TEXT NOT NULL REFERENCES households(id) ON DELETE CASCADE,
+      cat_id TEXT REFERENCES cats(id) ON DELETE CASCADE,
       role TEXT NOT NULL,
       content TEXT NOT NULL,
+      ts INTEGER NOT NULL,
+      rev INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
     CREATE INDEX IF NOT EXISTS idx_cats_household ON cats(household_id);
+    CREATE INDEX IF NOT EXISTS idx_cats_rev ON cats(household_id, rev);
     CREATE INDEX IF NOT EXISTS idx_logs_household ON logs(household_id);
     CREATE INDEX IF NOT EXISTS idx_logs_cat ON logs(cat_id);
+    CREATE INDEX IF NOT EXISTS idx_logs_rev ON logs(household_id, rev);
     CREATE INDEX IF NOT EXISTS idx_reminders_household ON reminders(household_id);
+    CREATE INDEX IF NOT EXISTS idx_reminders_cat ON reminders(cat_id);
+    CREATE INDEX IF NOT EXISTS idx_reminders_rev ON reminders(household_id, rev);
     CREATE INDEX IF NOT EXISTS idx_chats_household ON chats(household_id);
+    CREATE INDEX IF NOT EXISTS idx_chats_cat ON chats(cat_id);
+    CREATE INDEX IF NOT EXISTS idx_chats_rev ON chats(household_id, rev);
   `);
 }
 
 export function newId() {
   return randomUUID();
 }
+
+// 导入本模块即确保表结构就绪（解决 routes/models 在 initDb 前 prepare 的时序问题）
+initDb();

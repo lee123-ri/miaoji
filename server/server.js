@@ -4,6 +4,8 @@ import cors from 'cors';
 import { initDb } from './db.js';
 import authRoutes from './routes/auth.js';
 import householdRoutes from './routes/households.js';
+import resourceRoutes from './routes/resources.js';
+import syncRoutes from './routes/sync.js';
 
 const PORT = process.env.PORT || 3000;
 initDb();
@@ -15,6 +17,8 @@ app.use(express.json());
 app.get('/health', (req, res) => res.json({ ok: true, ts: Date.now() }));
 app.use('/api/auth', authRoutes);
 app.use('/api/households', householdRoutes);
+app.use('/api', resourceRoutes);
+app.use('/api/sync', syncRoutes);
 
 // 404
 app.use((req, res) => res.status(404).json({ error: 'not found' }));
