@@ -277,7 +277,7 @@ function localIdbDel(s,id){return new Promise((res,rej)=>{const t=DB.db.transact
 async function cloudPush(store,obj){if(!SYNC_STORES.includes(store)||!authReady())return;try{const changes={};changes[store]=[obj];await apiFetch('/api/sync?household_id='+encodeURIComponent(AUTH.hid),{method:'POST',body:JSON.stringify({changes})});localStorage.removeItem('mj_dirty')}catch(e){localStorage.setItem('mj_dirty','1')}}
 /* 离线改动回放：网络恢复时把本地全量重新推一遍（upsert 幂等，last-write-wins） */
 async function flushSync(){if(!authReady()||!localStorage.getItem('mj_dirty'))return;try{const changes={};for(const s of SYNC_STORES)changes[s]=await idbAll(s);await apiFetch('/api/sync?household_id='+encodeURIComponent(AUTH.hid),{method:'POST',body:JSON.stringify({changes})});localStorage.removeItem('mj_dirty');toast('☁️ 离线改动已同步')}catch(e){}}
-function effectiveAi(){return (S.settings&&S.settings.aiProxy)||CONFIG.ai}
+function effectiveAi(){return (S.settings&&S.settings.aiProxy)||CONFIG.ai||location.origin}
 function effectiveApi(){return (S.settings&&S.settings.apiBase)||CONFIG.api}
 /* 登录 / 注册 / 家庭组 */
 async function apiMe(){const j=await apiFetch('/api/households/me');AUTH.households=j.households||[];return AUTH.households}
@@ -571,6 +571,7 @@ let tlFilter='全部', curveRange=90;
 /* ================= 种子 ================= */
 async function seedIfEmpty(){
   if(authReady())return;   // 已登录云端模式不下演示数据
+  if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1')return; // 云端部署版不演示，保持账号干净
   const cats=await idbAll('cats'); if(cats.length)return;
   await idbPut('cats',{id:'c1',name:'咪咪',breed:'英短',sex:'母',birth:'2025-10-01',weight:3.9,neutered:'未绝育'});
   const now=Date.now(),D=86400000;
