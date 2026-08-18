@@ -76,15 +76,20 @@ export function upsert(table, o, hid) {
   return id;
 }
 
+// 软删除（多端删除一致性）：置 deleted_at + 抬高 rev，使 changedSince 不再返回、且拉取方据此删本地
+export function softDelete(table, id, hid) {
+  const rev = Date.now();
+  db.prepare(`UPDATE ${table} SET deleted_at=datetime('now'), rev=? WHERE id=? AND household_id=?`)
+    .run(rev, id, hid);
+  return rev;
+}
+
 // ---- 按 rev 增量拉取（同步用）：返回 since 之后变更且未删除的行 ----
 export function changedSince(table, hid, since) {
-  if (table === 'chats') {
-    return db.prepare('SELECT * FROM chats WHERE household_id=? AND rev>? ORDER BY rev')
-      .all(hid, since).map(chatToObj);
-  }
   const rows = db.prepare(`SELECT * FROM ${table} WHERE household_id=? AND rev>? AND deleted_at IS NULL ORDER BY rev`)
     .all(hid, since);
   if (table === 'cats') return rows.map(catToObj);
   if (table === 'logs') return rows.map(logToObj);
-  return rows.map(remToObj);
+  if (table === 'reminders') return rows.map(remToObj);
+  return rows.map(chatToObj);
 }

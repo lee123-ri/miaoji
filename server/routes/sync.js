@@ -2,7 +2,7 @@ import express from 'express';
 import { db } from '../db.js';
 import { authMiddleware } from '../auth.js';
 import { resolveHousehold } from '../household.js';
-import { upsert, changedSince } from '../models.js';
+import { upsert, softDelete, changedSince } from '../models.js';
 
 const router = express.Router();
 router.use(authMiddleware, resolveHousehold);
@@ -20,7 +20,8 @@ router.post('/', (req, res) => {
   const tx = db.transaction(() => {
     for (const table of ['cats', 'logs', 'reminders', 'chats']) {
       for (const o of changes[table] || []) {
-        upsert(table, o, req.householdId);
+        if (o && o._deleted) softDelete(table, o.id, req.householdId);
+        else upsert(table, o, req.householdId);
       }
     }
   });

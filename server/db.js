@@ -98,6 +98,7 @@ export function initDb() {
       content TEXT NOT NULL,
       ts INTEGER NOT NULL,
       rev INTEGER NOT NULL DEFAULT 0,
+      deleted_at TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -114,6 +115,8 @@ export function initDb() {
     CREATE INDEX IF NOT EXISTS idx_chats_cat ON chats(cat_id);
     CREATE INDEX IF NOT EXISTS idx_chats_rev ON chats(household_id, rev);
   `);
+  // 迁移：历史库 chats 缺少 deleted_at 列时补上（软删除同步用）
+  try { db.exec('ALTER TABLE chats ADD COLUMN deleted_at TEXT'); } catch (_) {}
 }
 
 export function newId() {
